@@ -10,6 +10,7 @@ import logging
 from pathlib import Path
 from datetime import datetime, timedelta
 from collections import defaultdict
+from typing import Dict
 from supabase import create_client
 from massive_client import MassiveClient
 from telegram_client import TelegramClient
@@ -154,6 +155,27 @@ def send_alert(signal: Dict, alert_type: str, priority: str):
         logger.error(f"Failed to send alert: {e}")
 
 
+def store_price_snapshot(symbol: str, snap: Dict):
+    """Write latest price for every symbol so dashboard can display live data."""
+    try:
+        supabase.table('signal_snapshots').insert({
+            'ticker': symbol,
+            'setup_family': 'PRICE',
+            'setup_state': 'LIVE',
+            'score': 0,
+            'payload': {
+                'price':  snap.get('price'),
+                'vwap':   snap.get('vwap'),
+                'ema20':  snap.get('ema20'),
+                'volume': snap.get('volume'),
+                'bid':    snap.get('bid'),
+                'ask':    snap.get('ask'),
+            }
+        }).execute()
+    except Exception as e:
+        logger.error(f"Failed to store price snapshot for {symbol}: {e}")
+
+
 def evaluate_signals(symbol: str, snap: Dict):
     """
     Evaluate VWAP+EMA signals for a symbol.
@@ -246,6 +268,7 @@ def main():
                 
                 for symbol, snap in snapshots.items():
                     try:
+                        store_price_snapshot(symbol, snap)
                         if symbol in ENABLED_SYMBOLS:
                             logger.info(f"Evaluating {symbol}...")
                         evaluate_signals(symbol, snap)

@@ -345,20 +345,51 @@
   const store = {}; // { SYM: {price, vwap, ema20, score, state, ts} }
 
   async function loadPrices() {
-    const data = await db('alerts','?select=ticker,context,created_at,priority&order=created_at.desc&limit=300');
-    (data||[]).forEach(row => {
+    // signal_snapshots has a PRICE row for every symbol every 5s (from updated worker)
+    // alerts has signal state for SPY/QQQ when signals fire
+    const [snaps, alerts] = await Promise.all([
+      db('signal_snapshots','?select=ticker,setup_state,score,payload,created_at&order=created_at.desc&limit=200'),
+      db('alerts','?select=ticker,context,created_at,priority&order=created_at.desc&limit=200'),
+    ]);
+
+    SYMBOLS.forEach(s => { delete store[s]; });
+
+    // Primary: PRICE snapshots give live price/vwap/ema for every symbol
+    (snaps||[]).forEach(row => {
       const s = row.ticker;
+      if (!store[s] && row.payload?.price) {
+        store[s] = {
+          price: row.payload.price,
+          vwap:  row.payload.vwap,
+          ema20: row.payload.ema20,
+          score: row.score,
+          state: (row.setup_state === 'LIVE' || row.setup_state === 'PRICE') ? '' : (row.setup_state || ''),
+          ts:    row.created_at,
+        };
+      }
+    });
+
+    // Overlay: pull signal state (READY/WATCH) from alerts
+    (alerts||[]).forEach(row => {
+      const s = row.ticker;
+      const sigState = row.context?.setup_state || row.priority || '';
+      if (store[s] && /^(ready|watch)$/i.test(sigState) && !store[s]._sig) {
+        store[s].state = sigState;
+        store[s]._sig = true;
+      }
+      // Fallback for symbols with no PRICE snapshot yet
       if (!store[s] && row.context?.entry_price) {
         store[s] = {
           price: row.context.entry_price,
           vwap:  row.context.vwap_at_entry,
           ema20: row.context.ema20_at_entry,
           score: row.context.setup_score,
-          state: row.context.setup_state || row.priority || '',
+          state: sigState,
           ts:    row.created_at,
         };
       }
     });
+
     renderTickerStrip('ticker-strip');
     renderTickerStrip('sys-ticker-strip');
     renderSigLevels();
