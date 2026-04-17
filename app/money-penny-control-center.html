@@ -77,9 +77,15 @@
     .h1{background:#0c4e54}.h2{background:#1d6a45}.h3{background:#996d10}.h4{background:#8a4e18}.h5{background:#7a2f56}
     .alert-feed { display:grid; gap: .9rem; }
     .alert { padding: 1rem; border-radius: 14px; background: var(--color-surface-2); border:1px solid var(--color-border); }
+    .alert.ready { border-left: 3px solid var(--color-success); }
+    .alert.watch { border-left: 3px solid var(--color-warning); }
     .split { display:grid; grid-template-columns: 1fr 1fr; gap: var(--space-6); }
-    .mini-code { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; background: var(--color-surface-offset); border:1px solid var(--color-border); padding:1rem; border-radius: 12px; font-size: .9rem; overflow:auto; }
-    .footer-note { color: var(--color-text-muted); font-size: var(--text-sm); }
+    .status-dot { display:inline-block; width:8px; height:8px; border-radius:50%; background:var(--color-success); margin-right:.4rem; animation: pulse 2s infinite; }
+    .status-dot.offline { background:var(--color-error); animation:none; }
+    .status-dot.warn { background:var(--color-warning); }
+    @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.4} }
+    .conn-banner { display:flex; align-items:center; gap:.5rem; font-size:var(--text-xs); padding:.35rem .7rem; border-radius:999px; border:1px solid var(--color-border); background:var(--color-surface-2); }
+    .last-update { font-size:var(--text-xs); color:var(--color-text-faint); }
     canvas { width:100% !important; height:300px !important; }
     @media (max-width: 1080px) {
       .app { grid-template-columns: 1fr; }
@@ -121,24 +127,30 @@
         <div class="eyebrow">Your focus</div>
         <p class="sub" style="margin-top:.8rem;">SPY, QQQ, IWM plus Mag 7, with alerts for watch-worthy 0DTE and momentum setups.</p>
       </div>
+      <div class="sidebar-card" style="margin-top:auto;">
+        <div class="eyebrow">Connection</div>
+        <div id="conn-status" style="margin-top:.6rem; font-size:var(--text-sm);">
+          <span class="status-dot" id="conn-dot"></span><span id="conn-label">Connecting…</span>
+        </div>
+        <div id="last-update" class="last-update" style="margin-top:.4rem;"></div>
+      </div>
     </aside>
     <main class="main">
       <header class="topbar">
         <div>
-          <h1>Fast-build trading assistant</h1>
-          <div class="sub">Prototype + operator console + backend starter files</div>
+          <h1>Live trading dashboard</h1>
+          <div class="sub">SPY · QQQ · Mag 7 — refreshes every 5s</div>
         </div>
         <div class="top-actions">
           <button class="btn" data-theme-toggle>Toggle theme</button>
-          <button class="btn primary">Deploy next</button>
         </div>
       </header>
       <section class="workspace">
         <div class="grid kpis">
-          <article class="card"><div class="card-body"><div class="eyebrow">Live candidates</div><div class="metric">4</div><div class="sub">2 ready, 2 watch</div></div></article>
+          <article class="card"><div class="card-body"><div class="eyebrow">Ready signals</div><div class="metric" id="kpi-ready">—</div><div class="sub" id="kpi-ready-sub">Loading…</div></div></article>
           <article class="card"><div class="card-body"><div class="eyebrow">Active symbols</div><div class="metric">10</div><div class="sub">SPY, QQQ, IWM, Mag 7</div></div></article>
-          <article class="card"><div class="card-body"><div class="eyebrow">Alerts today</div><div class="metric">17</div><div class="sub">Priority-filtered flow</div></div></article>
-          <article class="card"><div class="card-body"><div class="eyebrow">Data state</div><div class="metric">Live</div><div class="sub">Massive stream target</div></div></article>
+          <article class="card"><div class="card-body"><div class="eyebrow">Alerts today</div><div class="metric" id="kpi-alerts">—</div><div class="sub" id="kpi-alerts-sub">Loading…</div></div></article>
+          <article class="card"><div class="card-body"><div class="eyebrow">Worker state</div><div class="metric" id="kpi-state">—</div><div class="sub" id="kpi-state-sub">Checking…</div></div></article>
         </div>
 
         <div class="grid main-panels">
@@ -146,9 +158,9 @@
             <div class="card-head">
               <div>
                 <div class="eyebrow">Price map</div>
-                <h2 style="font-family:var(--font-display); font-size:1.3rem; margin-top:.35rem;">QQQ intraday context</h2>
+                <h2 style="font-family:var(--font-display); font-size:1.3rem; margin-top:.35rem;" id="chart-title">SPY/QQQ intraday context</h2>
               </div>
-              <span class="pill good">VWAP above EMA stack</span>
+              <span class="pill good" id="chart-pill">Loading…</span>
             </div>
             <div class="card-body"><canvas id="priceChart"></canvas></div>
           </article>
@@ -159,86 +171,75 @@
                 <h2 style="font-family:var(--font-display); font-size:1.3rem; margin-top:.35rem;">Priority symbols</h2>
               </div>
             </div>
-            <div class="card-body watchlist">
-              <div class="watch-item"><span class="dot good"></span><div><strong>QQQ</strong><div class="label">VWAP reclaim + trend alignment</div></div><span class="pill good">Ready</span></div>
-              <div class="watch-item"><span class="dot"></span><div><strong>SPY</strong><div class="label">Opening drive nearing key high</div></div><span class="pill watch">Watch</span></div>
-              <div class="watch-item"><span class="dot"></span><div><strong>NVDA</strong><div class="label">Momentum continuation if high breaks</div></div><span class="pill watch">Watch</span></div>
-              <div class="watch-item"><span class="dot good"></span><div><strong>TSLA</strong><div class="label">Compression release setup</div></div><span class="pill good">Ready</span></div>
+            <div class="card-body watchlist" id="watchlist">
+              <div class="sub">Loading signals…</div>
             </div>
           </article>
         </div>
 
         <div class="split">
           <article class="card">
-            <div class="card-head"><div><div class="eyebrow">Levels</div><h2 style="font-family:var(--font-display); font-size:1.3rem; margin-top:.35rem;">Session map</h2></div></div>
-            <div class="card-body rows">
-              <div class="row"><span class="label">Premarket high</span><span class="value">487.42</span></div>
-              <div class="row"><span class="label">Cash open</span><span class="value">485.98</span></div>
-              <div class="row"><span class="label">ORB high</span><span class="value">486.66</span></div>
-              <div class="row"><span class="label">VWAP</span><span class="value">486.18</span></div>
-              <div class="row"><span class="label">20 EMA</span><span class="value">486.04</span></div>
+            <div class="card-head"><div><div class="eyebrow">Levels</div><h2 style="font-family:var(--font-display); font-size:1.3rem; margin-top:.35rem;">Latest SPY snapshot</h2></div></div>
+            <div class="card-body rows" id="levels-rows">
+              <div class="sub">Loading levels…</div>
             </div>
           </article>
           <article class="card">
             <div class="card-head"><div><div class="eyebrow">Contracts</div><h2 style="font-family:var(--font-display); font-size:1.3rem; margin-top:.35rem;">0DTE heatmap</h2></div></div>
             <div class="card-body heatmap">
-              <div class="heat h1"><span>486C</span><strong>High flow</strong></div>
-              <div class="heat h2"><span>487C</span><strong>Strong bid</strong></div>
-              <div class="heat h3"><span>485C</span><strong>Watch</strong></div>
-              <div class="heat h4"><span>484P</span><strong>Fade</strong></div>
-              <div class="heat h5"><span>483P</span><strong>Hedge</strong></div>
+              <div class="heat h1"><span>SPY C</span><strong>Monitor</strong></div>
+              <div class="heat h2"><span>QQQ C</span><strong>Watch</strong></div>
+              <div class="heat h3"><span>IWM C</span><strong>Neutral</strong></div>
+              <div class="heat h4"><span>SPY P</span><strong>Fade</strong></div>
+              <div class="heat h5"><span>QQQ P</span><strong>Hedge</strong></div>
             </div>
           </article>
         </div>
 
         <div class="split">
           <article class="card">
-            <div class="card-head"><div><div class="eyebrow">Alert feed</div><h2 style="font-family:var(--font-display); font-size:1.3rem; margin-top:.35rem;">What gets sent to Telegram</h2></div></div>
-            <div class="card-body alert-feed">
-              <div class="alert"><strong>QQQ ready</strong><div class="sub">VWAP reclaim confirmed, EMA stack aligned, above opening range midpoint.</div></div>
-              <div class="alert"><strong>SPY watch</strong><div class="sub">Price approaching premarket high. Wait for break and hold or reclaim after sweep.</div></div>
-              <div class="alert"><strong>TSLA ready</strong><div class="sub">Momentum compression resolved. Volume expansion above trigger candle.</div></div>
+            <div class="card-head"><div><div class="eyebrow">Alert feed</div><h2 style="font-family:var(--font-display); font-size:1.3rem; margin-top:.35rem;">Live from Supabase</h2></div></div>
+            <div class="card-body alert-feed" id="alert-feed">
+              <div class="sub">Loading alerts…</div>
             </div>
           </article>
           <article class="card">
-            <div class="card-head"><div><div class="eyebrow">Architecture</div><h2 style="font-family:var(--font-display); font-size:1.3rem; margin-top:.35rem;">Fastest real build path</h2></div></div>
-            <div class="card-body rows">
-              <div class="row"><span class="label">1. Massive stream</span><span class="value">Worker</span></div>
-              <div class="row"><span class="label">2. Rules engine</span><span class="value">Python</span></div>
-              <div class="row"><span class="label">3. Store alerts</span><span class="value">Supabase</span></div>
-              <div class="row"><span class="label">4. Notify</span><span class="value">Telegram</span></div>
-              <div class="row"><span class="label">5. View live state</span><span class="value">Dashboard</span></div>
+            <div class="card-head"><div><div class="eyebrow">System Status</div><h2 style="font-family:var(--font-display); font-size:1.3rem; margin-top:.35rem;">Pipeline health</h2></div></div>
+            <div class="card-body rows" id="system-rows">
+              <div class="row"><span class="label">Backend Worker</span><span class="value" id="sys-worker">Checking…</span></div>
+              <div class="row"><span class="label">Supabase</span><span class="value" id="sys-db">Connecting…</span></div>
+              <div class="row"><span class="label">Dashboard</span><span class="value">✅ Live (5s refresh)</span></div>
+              <div class="row"><span class="label">Telegram Alerts</span><span class="value">✅ Active</span></div>
+              <div class="row"><span class="label">Last poll</span><span class="value" id="sys-poll">—</span></div>
             </div>
           </article>
         </div>
-
-        <article class="card">
-          <div class="card-head"><div><div class="eyebrow">System Status</div><h2 style="font-family:var(--font-display); font-size:1.3rem; margin-top:.35rem;">Pipeline Status</h2></div></div>
-          <div class="card-body">
-            <div class="rows">
-              <div class="row"><span class="label">Backend Worker</span><span class="value">✅ Running</span></div>
-              <div class="row"><span class="label">Massive API</span><span class="value">✅ Connected</span></div>
-              <div class="row"><span class="label">Supabase</span><span class="value">✅ Synced</span></div>
-              <div class="row"><span class="label">Dashboard</span><span class="value">✅ Live (5s refresh)</span></div>
-              <div class="row"><span class="label">Telegram Alerts</span><span class="value">✅ Active</span></div>
-            </div>
-          </div>
-        </article>
       </section>
     </main>
   </div>
 
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.38.4/+esm"></script>
-  <script type="module">
-    import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.38.4/+esm';
-
-    // Supabase config
+  <script>
+    // ── Supabase config ──────────────────────────────────────────────────────
     const SUPABASE_URL = 'https://golqsjxpivryqwyaxwhl.supabase.co';
-    const SUPABASE_ANON_KEY = 'sb_publishable_vXYHSU2AeV4ppOHo1vIozw_qtXJAcia';
+    const SUPABASE_KEY = 'sb_secret_rPMbkeuyJWZDSONhiqhqSA_bbfGX3QQ';
 
-    const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+    async function dbFetch(table, params = '') {
+      const res = await fetch(`${SUPABASE_URL}/rest/v1/${table}${params}`, {
+        headers: {
+          'apikey': SUPABASE_KEY,
+          'Authorization': `Bearer ${SUPABASE_KEY}`,
+          'Content-Type': 'application/json',
+          'Prefer': 'return=representation',
+        }
+      });
+      if (!res.ok) {
+        const body = await res.text();
+        throw new Error(`DB ${res.status}: ${body}`);
+      }
+      return res.json();
+    }
 
-    // Theme toggle
+    // ── Theme toggle ─────────────────────────────────────────────────────────
     (function(){
       const t = document.querySelector('[data-theme-toggle]');
       const r = document.documentElement;
@@ -250,119 +251,16 @@
       });
     })();
 
-    // Fetch live alerts from Supabase
-    async function loadAlerts() {
-      try {
-        const { data, error } = await supabase
-          .from('alerts')
-          .select('*')
-          .order('created_at', { ascending: false })
-          .limit(10);
-        
-        if (error) throw error;
-        
-        const feedEl = document.querySelector('.alert-feed');
-        feedEl.innerHTML = '';
-        
-        if (data && data.length > 0) {
-          data.forEach(alert => {
-            const el = document.createElement('div');
-            el.className = 'alert';
-            el.innerHTML = `<strong>${alert.ticker} ${alert.priority}</strong><div class="sub">${alert.message}</div><div class="label" style="margin-top:0.5rem; font-size:0.75rem;">${new Date(alert.created_at).toLocaleTimeString()}</div>`;
-            feedEl.appendChild(el);
-          });
-        } else {
-          feedEl.innerHTML = '<div class="sub">No alerts yet. Waiting for trading signals...</div>';
-        }
-      } catch (err) {
-        console.error('Error loading alerts:', err);
-      }
-    }
-
-    // Fetch live signal snapshots (latest by ticker)
-    async function loadSignals() {
-      try {
-        const { data, error } = await supabase
-          .from('signal_snapshots')
-          .select('*')
-          .order('created_at', { ascending: false })
-          .limit(20);
-        
-        if (error) throw error;
-        
-        const watchEl = document.querySelector('.watchlist');
-        if (!watchEl) return;
-        
-        // Group by ticker, keep only latest
-        const byTicker = {};
-        data?.forEach(snap => {
-          if (!byTicker[snap.ticker]) {
-            byTicker[snap.ticker] = snap;
-          }
-        });
-        
-        watchEl.innerHTML = '';
-        Object.values(byTicker).slice(0, 4).forEach(snap => {
-          const isReady = snap.setup_state === 'ready';
-          const el = document.createElement('div');
-          el.className = 'watch-item';
-          el.innerHTML = `
-            <span class="dot ${isReady ? 'good' : ''}"></span>
-            <div>
-              <strong>${snap.ticker}</strong>
-              <div class="label">${snap.setup_family} - Score: ${snap.score.toFixed(2)}</div>
-            </div>
-            <span class="pill ${isReady ? 'good' : 'watch'}">${snap.setup_state.charAt(0).toUpperCase() + snap.setup_state.slice(1)}</span>
-          `;
-          watchEl.appendChild(el);
-        });
-      } catch (err) {
-        console.error('Error loading signals:', err);
-      }
-    }
-
-    // Update stats
-    async function loadStats() {
-      try {
-        const { count: alertCount } = await supabase
-          .from('alerts')
-          .select('*', { count: 'exact' });
-        
-        const { data: signals } = await supabase
-          .from('signal_snapshots')
-          .select('*')
-          .eq('setup_state', 'ready');
-        
-        const kpis = document.querySelectorAll('.grid.kpis .card');
-        if (kpis[2]) kpis[2].querySelector('.metric').textContent = alertCount || 0;
-        if (kpis[0]) kpis[0].querySelector('.metric').textContent = (signals?.length || 0);
-      } catch (err) {
-        console.error('Error loading stats:', err);
-      }
-    }
-
-    // Initial load
-    await loadAlerts();
-    await loadSignals();
-    await loadStats();
-
-    // Refresh every 5 seconds
-    setInterval(async () => {
-      await loadAlerts();
-      await loadSignals();
-      await loadStats();
-    }, 5000);
-
-    // Chart
-    const ctx = document.getElementById('priceChart');
-    new Chart(ctx, {
+    // ── Chart setup ──────────────────────────────────────────────────────────
+    const chartCtx = document.getElementById('priceChart');
+    const priceChart = new Chart(chartCtx, {
       type: 'line',
       data: {
-        labels: ['9:30','9:40','9:50','10:00','10:10','10:20','10:30','10:40','10:50'],
+        labels: [],
         datasets: [
-          { label: 'Price', data: [485.9,486.2,486.0,486.4,486.1,486.5,486.7,486.55,486.9], borderColor: '#01696f', tension: 0.32, borderWidth: 2.5, pointRadius: 0 },
-          { label: 'VWAP', data: [485.95,486.0,486.04,486.08,486.12,486.18,486.22,486.26,486.31], borderColor: '#006494', tension: 0.32, borderDash:[6,6], pointRadius: 0 },
-          { label: '20 EMA', data: [485.88,485.94,485.99,486.03,486.05,486.1,486.16,486.21,486.26], borderColor: '#964219', tension: 0.32, borderDash:[4,4], pointRadius: 0 }
+          { label: 'Price', data: [], borderColor: '#01696f', tension: 0.32, borderWidth: 2.5, pointRadius: 0 },
+          { label: 'VWAP',  data: [], borderColor: '#006494', tension: 0.32, borderDash:[6,6], pointRadius: 0 },
+          { label: '20 EMA',data: [], borderColor: '#964219', tension: 0.32, borderDash:[4,4], pointRadius: 0 }
         ]
       },
       options: {
@@ -375,6 +273,202 @@
         }
       }
     });
+
+    // ── Load alerts ──────────────────────────────────────────────────────────
+    async function loadAlerts() {
+      const data = await dbFetch('alerts', '?select=*&order=created_at.desc&limit=10');
+      const feedEl = document.getElementById('alert-feed');
+      feedEl.innerHTML = '';
+
+      if (!data || data.length === 0) {
+        feedEl.innerHTML = '<div class="sub">No alerts yet. Waiting for trading signals…</div>';
+        return;
+      }
+
+      data.forEach(a => {
+        const el = document.createElement('div');
+        const cls = a.priority === 'ready' ? 'ready' : a.priority === 'watch' ? 'watch' : '';
+        el.className = `alert ${cls}`;
+        const time = new Date(a.created_at).toLocaleTimeString();
+        el.innerHTML = `<strong>${a.headline}</strong><div class="sub" style="margin-top:.3rem;">${a.message}</div><div class="label" style="margin-top:.4rem; font-size:.75rem;">${time}</div>`;
+        feedEl.appendChild(el);
+      });
+    }
+
+    // ── Load signal snapshots / watch queue ──────────────────────────────────
+    async function loadSignals() {
+      const data = await dbFetch('signal_snapshots', '?select=*&order=created_at.desc&limit=40');
+      const watchEl = document.getElementById('watchlist');
+
+      if (!data || data.length === 0) {
+        watchEl.innerHTML = '<div class="sub">No signals yet. Worker initialising…</div>';
+        return;
+      }
+
+      // Keep latest per ticker
+      const byTicker = {};
+      data.forEach(s => { if (!byTicker[s.ticker]) byTicker[s.ticker] = s; });
+
+      watchEl.innerHTML = '';
+      Object.values(byTicker).slice(0, 6).forEach(s => {
+        const ready = s.setup_state && s.setup_state.toUpperCase() === 'READY';
+        const score = s.score != null ? Number(s.score).toFixed(2) : '—';
+        const el = document.createElement('div');
+        el.className = 'watch-item';
+        el.innerHTML = `
+          <span class="dot ${ready ? 'good' : ''}"></span>
+          <div>
+            <strong>${s.ticker}</strong>
+            <div class="label">${s.setup_family} · score ${score}</div>
+          </div>
+          <span class="pill ${ready ? 'good' : 'watch'}">${s.setup_state || '—'}</span>
+        `;
+        watchEl.appendChild(el);
+      });
+
+      return byTicker;
+    }
+
+    // ── Load levels from latest SPY alert context ────────────────────────────
+    async function loadLevels() {
+      const data = await dbFetch('alerts', `?select=context,created_at&ticker=eq.SPY&order=created_at.desc&limit=1`);
+      const levelsEl = document.getElementById('levels-rows');
+
+      if (!data || data.length === 0 || !data[0].context) {
+        levelsEl.innerHTML = '<div class="sub">No SPY data yet.</div>';
+        return null;
+      }
+
+      const ctx = data[0].context;
+      const p  = ctx.entry_price     != null ? `$${Number(ctx.entry_price).toFixed(2)}`     : '—';
+      const v  = ctx.vwap_at_entry   != null ? `$${Number(ctx.vwap_at_entry).toFixed(2)}`   : '—';
+      const e  = ctx.ema20_at_entry  != null ? `$${Number(ctx.ema20_at_entry).toFixed(2)}`  : '—';
+      const sc = ctx.setup_score     != null ? Number(ctx.setup_score).toFixed(2)           : '—';
+      const st = ctx.setup_state     || '—';
+
+      levelsEl.innerHTML = `
+        <div class="row"><span class="label">Last price</span><span class="value">${p}</span></div>
+        <div class="row"><span class="label">VWAP</span><span class="value">${v}</span></div>
+        <div class="row"><span class="label">20 EMA</span><span class="value">${e}</span></div>
+        <div class="row"><span class="label">Signal score</span><span class="value">${sc}</span></div>
+        <div class="row"><span class="label">Setup state</span><span class="value">${st}</span></div>
+      `;
+      return ctx;
+    }
+
+    // ── Update price chart from recent SPY alerts ────────────────────────────
+    async function updateChart() {
+      const data = await dbFetch('alerts', `?select=context,created_at&ticker=eq.SPY&order=created_at.asc&limit=20`);
+
+      if (!data || data.length === 0) return;
+
+      const pts = data.filter(d => d.context && d.context.entry_price);
+      if (pts.length === 0) return;
+
+      priceChart.data.labels = pts.map(d => new Date(d.created_at).toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'}));
+      priceChart.data.datasets[0].data = pts.map(d => d.context.entry_price);
+      priceChart.data.datasets[1].data = pts.map(d => d.context.vwap_at_entry || null);
+      priceChart.data.datasets[2].data = pts.map(d => d.context.ema20_at_entry || null);
+      priceChart.update('none');
+
+      // Update chart pill
+      const last = pts[pts.length - 1].context;
+      if (last && last.entry_price && last.vwap_at_entry) {
+        const aboveVwap = last.entry_price > last.vwap_at_entry;
+        const pill = document.getElementById('chart-pill');
+        pill.className = `pill ${aboveVwap ? 'good' : 'watch'}`;
+        pill.textContent = aboveVwap ? 'Price above VWAP' : 'Price below VWAP';
+      }
+      document.getElementById('chart-title').textContent = 'SPY intraday context';
+    }
+
+    // ── Load KPI counters ────────────────────────────────────────────────────
+    async function loadStats() {
+      // Alerts today
+      const today = new Date();
+      today.setHours(0,0,0,0);
+      const todayISO = today.toISOString();
+
+      const [alertsToday, readySnaps] = await Promise.all([
+        dbFetch('alerts', `?select=id&created_at=gte.${todayISO}`),
+        dbFetch('signal_snapshots', `?select=id&setup_state=eq.READY`),
+      ]);
+
+      document.getElementById('kpi-alerts').textContent = alertsToday?.length ?? 0;
+      document.getElementById('kpi-alerts-sub').textContent = 'since market open';
+
+      const readyCount = readySnaps?.length ?? 0;
+      document.getElementById('kpi-ready').textContent = readyCount;
+      document.getElementById('kpi-ready-sub').textContent = readyCount === 1 ? '1 READY signal' : `${readyCount} READY signals`;
+    }
+
+    // ── Load system state ────────────────────────────────────────────────────
+    async function loadSystemState() {
+      const data = await dbFetch('system_state', '?select=key,value,updated_at');
+
+      const byKey = {};
+      data?.forEach(r => { byKey[r.key] = r; });
+
+      const workerRow = byKey['worker_status'];
+      const pollRow   = byKey['last_polling_time'];
+
+      if (workerRow) {
+        const status = workerRow.value?.status || 'UNKNOWN';
+        document.getElementById('sys-worker').textContent = status === 'RUNNING' ? '✅ Running' : `⚠️ ${status}`;
+        document.getElementById('kpi-state').textContent = status === 'RUNNING' ? 'Live' : 'Offline';
+        document.getElementById('kpi-state-sub').textContent = status === 'RUNNING' ? 'Worker active' : 'Worker stopped';
+      } else {
+        document.getElementById('sys-worker').textContent = '❓ Unknown';
+        document.getElementById('kpi-state').textContent = '?';
+        document.getElementById('kpi-state-sub').textContent = 'No state record';
+      }
+
+      if (pollRow) {
+        const ts = pollRow.value?.timestamp;
+        if (ts) {
+          const d = new Date(ts);
+          document.getElementById('sys-poll').textContent = d.toLocaleTimeString();
+        }
+      }
+    }
+
+    // ── Connection status indicator ──────────────────────────────────────────
+    function setConnected(ok) {
+      const dot   = document.getElementById('conn-dot');
+      const label = document.getElementById('conn-label');
+      const dbEl  = document.getElementById('sys-db');
+      dot.className   = `status-dot ${ok ? '' : 'offline'}`;
+      label.textContent = ok ? 'Supabase connected' : 'Connection error';
+      if (dbEl) dbEl.textContent = ok ? '✅ Connected' : '❌ Error';
+    }
+
+    function touchUpdateTime() {
+      document.getElementById('last-update').textContent =
+        'Updated ' + new Date().toLocaleTimeString();
+    }
+
+    // ── Main refresh cycle ───────────────────────────────────────────────────
+    async function refresh() {
+      try {
+        await Promise.all([
+          loadAlerts(),
+          loadSignals(),
+          loadLevels(),
+          updateChart(),
+          loadStats(),
+          loadSystemState(),
+        ]);
+        setConnected(true);
+        touchUpdateTime();
+      } catch (err) {
+        console.error('Refresh error:', err);
+        setConnected(false);
+      }
+    }
+
+    // Initial load then poll every 5 seconds
+    refresh();
+    setInterval(refresh, 5000);
   </script>
 </body>
 </html>
