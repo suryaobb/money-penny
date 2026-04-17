@@ -4,6 +4,7 @@ from massive import RESTClient
 from datetime import datetime, timedelta
 import threading
 import time
+import math
 
 class MassiveClient:
     def __init__(self, config_path='config.json'):
@@ -117,6 +118,69 @@ class MassiveClient:
         else:
             print(f"  ⚠️  No live data - using mock data")
             return self.mock_snapshot()
+
+    def get_session_levels(self, symbol: str) -> dict:
+        """Fetch previous day OHLC and key S/R levels from last 5 days."""
+        if not self.connected or not self.client:
+            return self._mock_session_levels(symbol)
+        try:
+            today = datetime.now().date()
+            aggs = list(self.client.list_aggs(
+                ticker=symbol,
+                multiplier=1,
+                timespan='day',
+                from_=str(today - timedelta(days=12)),
+                to=str(today - timedelta(days=1)),
+                limit=10
+            ))
+            if not aggs:
+                return self._mock_session_levels(symbol)
+
+            aggs = sorted(aggs, key=lambda x: getattr(x, 'timestamp', 0))
+            prev = aggs[-1]
+
+            # Collect significant highs/lows from last 5 days
+            raw_levels = []
+            for a in aggs[-5:]:
+                raw_levels.append(float(a.high))
+                raw_levels.append(float(a.low))
+
+            # Deduplicate levels within 0.3% of each other
+            raw_levels = sorted(raw_levels)
+            deduped = []
+            for lvl in raw_levels:
+                if not deduped or abs(lvl - deduped[-1]) / deduped[-1] > 0.003:
+                    deduped.append(round(lvl, 2))
+
+            return {
+                'prev_day_high':  round(float(prev.high), 2),
+                'prev_day_low':   round(float(prev.low), 2),
+                'prev_day_close': round(float(prev.close), 2),
+                'prev_day_open':  round(float(prev.open), 2),
+                'sr_levels':      deduped,
+                'source': 'live',
+            }
+        except Exception as e:
+            print(f'  ⚠️  {symbol}: session levels error — {e}')
+            return self._mock_session_levels(symbol)
+
+    def _mock_session_levels(self, symbol: str) -> dict:
+        mock_bases = {
+            'SPY':588,'QQQ':640,'IWM':198,'AAPL':195,'AMZN':199,
+            'META':677,'MSFT':421,'NVDA':198,'TSLA':388,'GOOGL':337,
+        }
+        b = mock_bases.get(symbol, 300)
+        return {
+            'prev_day_high':  round(b * 1.008, 2),
+            'prev_day_low':   round(b * 0.992, 2),
+            'prev_day_close': round(b * 1.001, 2),
+            'prev_day_open':  round(b * 0.998, 2),
+            'sr_levels': [
+                round(b * 0.985, 2), round(b * 0.992, 2),
+                round(b * 1.000, 2), round(b * 1.008, 2), round(b * 1.015, 2),
+            ],
+            'source': 'mock',
+        }
 
     def mock_snapshot(self):
         """Fallback mock data — all 10 symbols covered"""

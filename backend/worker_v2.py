@@ -47,19 +47,36 @@ MAX_CANDLES_HISTORY = 60  # Keep 60 minutes of 1-min candles
 def init_system():
     """Initialize system state in Supabase"""
     try:
-        supabase.table('system_state').upsert({
-            'key': 'last_polling_time',
-            'value': {'timestamp': datetime.now().isoformat()}
-        }).execute()
-        
-        supabase.table('system_state').upsert({
-            'key': 'worker_status',
-            'value': {'status': 'RUNNING', 'started_at': datetime.now().isoformat()}
-        }).execute()
-        
+        supabase.table('system_state').upsert(
+            {'key': 'last_polling_time', 'value': {'timestamp': datetime.now().isoformat()}},
+            on_conflict='key'
+        ).execute()
+        supabase.table('system_state').upsert(
+            {'key': 'worker_status', 'value': {'status': 'RUNNING', 'started_at': datetime.now().isoformat()}},
+            on_conflict='key'
+        ).execute()
         logger.info("System state initialized")
     except Exception as e:
         logger.error(f"Failed to init system state: {e}")
+
+
+def fetch_and_store_session_levels():
+    """Fetch previous day OHLC + S/R levels for all symbols and write to Supabase."""
+    logger.info("Fetching session levels for all symbols...")
+    for symbol in ALL_SYMBOLS:
+        try:
+            levels = massive.get_session_levels(symbol)
+            if levels:
+                supabase.table('signal_snapshots').insert({
+                    'ticker': symbol,
+                    'setup_family': 'SESSION',
+                    'setup_state': 'LEVELS',
+                    'score': 0,
+                    'payload': levels,
+                }).execute()
+                logger.info(f"  {symbol}: PDH={levels['prev_day_high']} PDL={levels['prev_day_low']} ({levels['source']})")
+        except Exception as e:
+            logger.error(f"Failed to store session levels for {symbol}: {e}")
 
 
 def fetch_live_data():
@@ -252,8 +269,10 @@ def main():
     # Initialize
     massive.connect()
     init_system()
-    
+    fetch_and_store_session_levels()
+
     poll_count = 0
+    last_levels_refresh = datetime.now()
     
     try:
         while True:
@@ -279,13 +298,18 @@ def main():
             
             # Update system state
             try:
-                supabase.table('system_state').upsert({
-                    'key': 'last_polling_time',
-                    'value': {'timestamp': datetime.now().isoformat(), 'poll_count': poll_count}
-                }).execute()
+                supabase.table('system_state').upsert(
+                    {'key': 'last_polling_time', 'value': {'timestamp': datetime.now().isoformat(), 'poll_count': poll_count}},
+                    on_conflict='key'
+                ).execute()
             except:
                 pass
             
+            # Refresh session levels every 30 minutes
+            if (datetime.now() - last_levels_refresh).seconds >= 1800:
+                fetch_and_store_session_levels()
+                last_levels_refresh = datetime.now()
+
             time.sleep(POLL_INTERVAL)
     
     except KeyboardInterrupt:

@@ -5,160 +5,190 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Money Penny</title>
   <link href="https://api.fontshare.com/v2/css?f[]=satoshi@400,500,700&f[]=general-sans@500,600,700&display=swap" rel="stylesheet">
-  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
   <style>
-    :root {
-      --bg:#0c0c0e; --surface:#111114; --surface2:#17171b; --surface3:#1d1d22;
-      --border:#26262e; --divider:#1e1e24;
-      --text:#eeedf0; --muted:#888896; --faint:#44444f;
-      --green:#22c55e; --green-bg:rgba(34,197,94,.1);
-      --amber:#f59e0b; --amber-bg:rgba(245,158,11,.1);
-      --red:#ef4444;   --red-bg:rgba(239,68,68,.1);
-      --blue:#3b82f6;  --blue-bg:rgba(59,130,246,.1);
-      --teal:#14b8a6;
+    :root{
+      --bg:#0b0b0d;--surface:#111115;--s2:#17171c;--s3:#1d1d24;
+      --border:#25252e;--div:#1c1c23;
+      --text:#edecf0;--muted:#888898;--faint:#42424f;
+      --green:#22c55e;--gbg:rgba(34,197,94,.12);--gborder:rgba(34,197,94,.25);
+      --amber:#f59e0b;--abg:rgba(245,158,11,.12);--aborder:rgba(245,158,11,.25);
+      --red:#ef4444;  --rbg:rgba(239,68,68,.12);
+      --blue:#3b82f6; --bbg:rgba(59,130,246,.12);
+      --teal:#14b8a6; --purple:#a855f7;
       --font:'Satoshi',system-ui,sans-serif;
       --mono:ui-monospace,'SF Mono',Menlo,monospace;
     }
     *{box-sizing:border-box;margin:0;padding:0;}
-    body{font-family:var(--font);background:var(--bg);color:var(--text);font-size:14px;min-height:100vh;overflow-x:hidden;}
+    body{font-family:var(--font);background:var(--bg);color:var(--text);font-size:14px;min-height:100vh;}
     button{cursor:pointer;font:inherit;color:inherit;background:none;border:none;}
+    select{font:inherit;color:inherit;}
 
-    /* ── Shell ────────────────────────────────────────── */
-    .shell{display:grid;grid-template-columns:220px 1fr;min-height:100vh;}
+    /* Shell */
+    .shell{display:grid;grid-template-columns:200px 1fr;min-height:100vh;}
 
-    /* ── Sidebar ──────────────────────────────────────── */
-    .sidebar{background:var(--surface);border-right:1px solid var(--border);display:flex;flex-direction:column;padding:20px 12px;gap:4px;position:sticky;top:0;height:100vh;overflow-y:auto;}
-    .sidebar-brand{display:flex;align-items:center;gap:10px;padding:4px 8px 20px;border-bottom:1px solid var(--divider);margin-bottom:8px;}
-    .brand-dot{width:28px;height:28px;border-radius:8px;background:linear-gradient(135deg,var(--teal),var(--blue));display:grid;place-items:center;flex-shrink:0;}
-    .brand-dot svg{width:14px;height:14px;stroke:#fff;fill:none;stroke-width:2;}
-    .brand-name{font-family:'General Sans',sans-serif;font-weight:700;font-size:15px;}
-    .brand-sub{font-size:10px;color:var(--faint);margin-top:1px;}
-    .nav-label{font-size:10px;text-transform:uppercase;letter-spacing:.08em;color:var(--faint);padding:8px 10px 4px;margin-top:8px;}
-    .nav-btn{display:flex;align-items:center;gap:10px;padding:9px 10px;border-radius:10px;font-size:13px;color:var(--muted);transition:all .15s;width:100%;}
-    .nav-btn svg{width:16px;height:16px;flex-shrink:0;opacity:.7;}
-    .nav-btn:hover{background:var(--surface2);color:var(--text);}
-    .nav-btn.active{background:var(--surface3);color:var(--text);}
-    .nav-btn.active svg{opacity:1;}
-    .sidebar-footer{margin-top:auto;padding-top:16px;border-top:1px solid var(--divider);}
-    .conn-pill{display:flex;align-items:center;gap:6px;padding:8px 10px;border-radius:10px;background:var(--surface2);font-size:12px;color:var(--muted);}
-    .conn-dot{width:7px;height:7px;border-radius:50%;background:var(--green);animation:blink 2s infinite;flex-shrink:0;}
-    .conn-dot.dead{background:var(--red);animation:none;}
-    @keyframes blink{0%,100%{opacity:1}50%{opacity:.35}}
-    .last-up{font-size:10px;color:var(--faint);padding:4px 10px 0;}
+    /* Sidebar */
+    .sidebar{background:var(--surface);border-right:1px solid var(--border);display:flex;flex-direction:column;padding:16px 10px;gap:2px;position:sticky;top:0;height:100vh;}
+    .brand{display:flex;align-items:center;gap:9px;padding:4px 8px 18px;border-bottom:1px solid var(--div);margin-bottom:10px;}
+    .brand-icon{width:26px;height:26px;border-radius:7px;background:linear-gradient(135deg,var(--teal),var(--blue));display:grid;place-items:center;flex-shrink:0;}
+    .brand-icon svg{width:13px;height:13px;stroke:#fff;fill:none;stroke-width:2.2;}
+    .brand-name{font-family:'General Sans',sans-serif;font-weight:700;font-size:14px;line-height:1.1;}
+    .brand-sub{font-size:10px;color:var(--faint);}
+    .nav-btn{display:flex;align-items:center;gap:9px;padding:8px 10px;border-radius:9px;font-size:13px;color:var(--muted);width:100%;transition:all .12s;}
+    .nav-btn svg{width:15px;height:15px;flex-shrink:0;}
+    .nav-btn:hover{background:var(--s2);color:var(--text);}
+    .nav-btn.active{background:var(--s3);color:var(--text);}
+    .nav-section{font-size:10px;text-transform:uppercase;letter-spacing:.07em;color:var(--faint);padding:10px 10px 4px;margin-top:4px;}
+    .sidebar-foot{margin-top:auto;padding-top:14px;border-top:1px solid var(--div);display:flex;flex-direction:column;gap:4px;}
+    .conn-row{display:flex;align-items:center;gap:6px;padding:6px 8px;border-radius:8px;background:var(--s2);font-size:11px;color:var(--muted);}
+    .dot{width:6px;height:6px;border-radius:50%;background:var(--green);animation:blink 2s infinite;flex-shrink:0;}
+    .dot.dead{background:var(--red);animation:none;}
+    @keyframes blink{0%,100%{opacity:1}50%{opacity:.3}}
+    .foot-time{font-size:10px;color:var(--faint);padding:2px 8px;}
 
-    /* ── Main ─────────────────────────────────────────── */
+    /* Main */
     .main{display:flex;flex-direction:column;min-width:0;}
-    .topbar{background:var(--surface);border-bottom:1px solid var(--border);padding:0 24px;height:52px;display:flex;align-items:center;justify-content:space-between;gap:16px;position:sticky;top:0;z-index:10;}
-    .page-title{font-family:'General Sans',sans-serif;font-weight:700;font-size:16px;}
-    .topbar-meta{font-size:12px;color:var(--faint);}
+    .topbar{background:var(--surface);border-bottom:1px solid var(--border);padding:0 20px;height:50px;display:flex;align-items:center;justify-content:space-between;gap:16px;position:sticky;top:0;z-index:20;}
+    .page-title{font-family:'General Sans',sans-serif;font-weight:700;font-size:15px;}
+    .topbar-right{display:flex;align-items:center;gap:12px;font-size:12px;color:var(--faint);}
 
-    /* ── Views ────────────────────────────────────────── */
-    .view{display:none;padding:24px;gap:20px;flex-direction:column;}
+    /* Views */
+    .view{display:none;padding:20px;flex-direction:column;gap:18px;}
     .view.active{display:flex;}
 
-    /* ── Ticker strip ─────────────────────────────────── */
-    .ticker-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:10px;}
-    .t-card{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:14px;cursor:pointer;transition:border-color .15s;}
-    .t-card:hover{border-color:var(--muted);}
-    .t-card.sig-ready{border-color:var(--green);background:var(--green-bg);}
-    .t-card.sig-watch{border-color:var(--amber);background:var(--amber-bg);}
-    .t-sym{font-family:'General Sans',sans-serif;font-weight:700;font-size:13px;color:var(--muted);}
-    .t-price{font-family:var(--mono);font-size:22px;font-weight:700;margin-top:4px;}
-    .t-price.up{color:var(--green);}
-    .t-price.dn{color:var(--red);}
-    .t-price.fl{color:var(--text);}
-    .t-rows{margin-top:8px;display:grid;gap:3px;}
-    .t-row{display:flex;justify-content:space-between;font-size:11px;}
-    .t-row span:first-child{color:var(--faint);}
-    .t-row span:last-child{font-family:var(--mono);color:var(--muted);}
-    .t-age{font-size:10px;color:var(--faint);margin-top:6px;}
-    .t-badge{display:inline-flex;align-items:center;gap:3px;font-size:10px;font-weight:600;padding:2px 7px;border-radius:20px;margin-top:6px;}
-    .t-badge.ready{background:var(--green-bg);color:var(--green);}
-    .t-badge.watch{background:var(--amber-bg);color:var(--amber);}
-    .t-badge.none{background:var(--surface2);color:var(--faint);}
+    /* Section label */
+    .sec-label{font-size:10px;text-transform:uppercase;letter-spacing:.07em;color:var(--faint);}
 
-    /* ── KPI bar ──────────────────────────────────────── */
-    .kpi-bar{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;}
-    .kpi{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:16px;}
-    .kpi-lbl{font-size:11px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);}
-    .kpi-val{font-family:'General Sans',sans-serif;font-size:26px;font-weight:700;line-height:1;margin-top:6px;}
-    .kpi-sub{font-size:11px;color:var(--faint);margin-top:4px;}
+    /* ── SIGNAL CARDS ── */
+    .signal-hero{display:grid;gap:12px;}
+    .no-signals{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:28px;text-align:center;color:var(--faint);font-size:13px;}
+    .signal-card{background:var(--surface);border:1px solid var(--gborder);border-radius:14px;padding:18px;display:grid;grid-template-columns:1fr auto;gap:16px;position:relative;overflow:hidden;}
+    .signal-card::before{content:'';position:absolute;left:0;top:0;bottom:0;width:3px;background:var(--green);}
+    .signal-card.watch::before{background:var(--amber);}
+    .signal-card.watch{border-color:var(--aborder);}
+    .sc-top{display:flex;align-items:center;gap:10px;margin-bottom:12px;}
+    .sc-sym{font-family:'General Sans',sans-serif;font-weight:700;font-size:20px;}
+    .sc-badge{font-size:11px;font-weight:700;padding:3px 9px;border-radius:20px;background:var(--gbg);color:var(--green);}
+    .sc-badge.watch{background:var(--abg);color:var(--amber);}
+    .sc-age{font-size:11px;color:var(--faint);margin-left:auto;}
+    .sc-levels{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;}
+    .sc-level{background:var(--s2);border:1px solid var(--border);border-radius:10px;padding:10px 12px;}
+    .sc-level-lbl{font-size:10px;text-transform:uppercase;letter-spacing:.06em;color:var(--faint);margin-bottom:4px;}
+    .sc-level-val{font-family:var(--mono);font-size:18px;font-weight:700;}
+    .sc-level-val.entry{color:var(--green);}
+    .sc-level-val.stop{color:var(--red);}
+    .sc-level-val.target{color:var(--blue);}
+    .sc-level-sub{font-size:10px;color:var(--faint);margin-top:2px;}
+    .sc-right{display:flex;flex-direction:column;gap:8px;min-width:120px;}
+    .sc-score-wrap{background:var(--s2);border:1px solid var(--border);border-radius:10px;padding:10px 12px;text-align:center;}
+    .sc-score-num{font-family:var(--mono);font-size:22px;font-weight:700;color:var(--green);}
+    .sc-score-lbl{font-size:10px;color:var(--faint);margin-top:2px;}
+    .sc-reason{font-size:11px;color:var(--muted);line-height:1.5;background:var(--s2);border-radius:8px;padding:8px 10px;}
+    .sc-reason.watch{color:var(--amber);}
 
-    /* ── Two-column panel row ─────────────────────────── */
-    .col2{display:grid;grid-template-columns:1.6fr 1fr;gap:20px;align-items:start;}
+    /* ── SCANNER TABLE ── */
+    .scanner{background:var(--surface);border:1px solid var(--border);border-radius:14px;overflow:hidden;}
+    .scanner-head{display:grid;grid-template-columns:80px 1fr 90px 90px 90px 90px 110px;padding:10px 16px;border-bottom:1px solid var(--border);font-size:10px;text-transform:uppercase;letter-spacing:.06em;color:var(--faint);}
+    .scanner-row{display:grid;grid-template-columns:80px 1fr 90px 90px 90px 90px 110px;padding:11px 16px;border-bottom:1px solid var(--div);align-items:center;transition:background .1s;}
+    .scanner-row:last-child{border-bottom:none;}
+    .scanner-row:hover{background:var(--s2);}
+    .scanner-row.sig-ready{background:rgba(34,197,94,.04);}
+    .scanner-row.sig-watch{background:rgba(245,158,11,.04);}
+    .sr-sym{font-family:'General Sans',sans-serif;font-weight:700;font-size:14px;}
+    .sr-price{font-family:var(--mono);font-size:14px;font-weight:600;}
+    .sr-price.up{color:var(--green);}
+    .sr-price.dn{color:var(--red);}
+    .sr-cell{font-size:12px;color:var(--muted);}
+    .sr-cell.pos{color:var(--green);}
+    .sr-cell.neg{color:var(--red);}
+    .sr-bar-wrap{height:4px;background:var(--s3);border-radius:2px;width:80px;}
+    .sr-bar{height:4px;border-radius:2px;background:var(--green);}
+    .state-pill{display:inline-flex;align-items:center;gap:4px;font-size:10px;font-weight:700;padding:3px 8px;border-radius:20px;}
+    .state-pill.ready{background:var(--gbg);color:var(--green);}
+    .state-pill.watch{background:var(--abg);color:var(--amber);}
+    .state-pill.live{background:var(--s3);color:var(--faint);}
+
+    /* ── CHART ── */
+    .chart-panel{background:var(--surface);border:1px solid var(--border);border-radius:14px;overflow:hidden;}
+    .chart-head{padding:14px 18px;display:flex;align-items:center;gap:12px;border-bottom:1px solid var(--div);}
+    .chart-title{font-family:'General Sans',sans-serif;font-weight:700;font-size:14px;flex:1;}
+    .chart-legend{display:flex;gap:14px;align-items:center;flex-wrap:wrap;}
+    .leg-item{display:flex;align-items:center;gap:5px;font-size:11px;color:var(--muted);}
+    .leg-line{width:20px;height:2px;border-radius:2px;}
+    .leg-dashed{width:20px;height:0;border-top:2px dashed;}
+    select.sym-sel{background:var(--s2);border:1px solid var(--border);color:var(--text);border-radius:8px;padding:4px 8px;font-size:12px;cursor:pointer;}
+    .chart-wrap{padding:14px 18px;}
+    canvas{width:100%!important;height:280px!important;}
+
+    /* ── ALERT HISTORY ── */
+    .alert-list{display:grid;gap:8px;}
+    .al-item{background:var(--surface);border:1px solid var(--border);border-radius:11px;padding:12px 14px;display:grid;grid-template-columns:1fr auto;gap:8px;}
+    .al-item.ready{border-left:3px solid var(--green);}
+    .al-item.watch{border-left:3px solid var(--amber);}
+    .al-head{font-weight:600;font-size:13px;margin-bottom:3px;}
+    .al-msg{font-size:12px;color:var(--muted);line-height:1.5;}
+    .al-chips{display:flex;gap:6px;margin-top:6px;flex-wrap:wrap;}
+    .chip{font-size:11px;font-family:var(--mono);background:var(--s2);border:1px solid var(--border);border-radius:5px;padding:2px 7px;color:var(--muted);}
+    .al-time{font-size:11px;color:var(--faint);font-family:var(--mono);white-space:nowrap;}
+
+    /* ── SYSTEM VIEW ── */
+    .two-col{display:grid;grid-template-columns:1fr 1fr;gap:18px;}
     .panel{background:var(--surface);border:1px solid var(--border);border-radius:14px;overflow:hidden;}
-    .ph{padding:14px 18px 0;display:flex;justify-content:space-between;align-items:center;gap:12px;}
+    .ph{padding:14px 18px 0;display:flex;align-items:center;justify-content:space-between;}
     .ph-title{font-family:'General Sans',sans-serif;font-weight:700;font-size:14px;}
-    .ph-eye{font-size:10px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);margin-bottom:3px;}
     .pb{padding:14px 18px;}
-    canvas{width:100%!important;height:240px!important;}
-
-    /* ── Alert feed ───────────────────────────────────── */
-    .alert-scroll{max-height:380px;overflow-y:auto;display:grid;gap:8px;}
-    .alert-scroll::-webkit-scrollbar{width:3px;}
-    .alert-scroll::-webkit-scrollbar-thumb{background:var(--border);border-radius:3px;}
-    .a-item{background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:10px 12px;}
-    .a-item.ready{border-left:3px solid var(--green);}
-    .a-item.watch{border-left:3px solid var(--amber);}
-    .a-top{display:flex;justify-content:space-between;gap:8px;align-items:flex-start;}
-    .a-head{font-weight:600;font-size:13px;}
-    .a-time{font-size:10px;font-family:var(--mono);color:var(--faint);white-space:nowrap;padding-top:2px;}
-    .a-msg{font-size:12px;color:var(--muted);margin-top:4px;line-height:1.5;}
-    .a-chips{display:flex;gap:6px;margin-top:6px;flex-wrap:wrap;}
-    .chip{font-size:11px;font-family:var(--mono);background:var(--surface);border:1px solid var(--border);border-radius:6px;padding:2px 7px;color:var(--muted);}
-
-    /* ── Status rows ──────────────────────────────────── */
     .s-list{display:grid;gap:0;}
-    .s-row{display:flex;justify-content:space-between;align-items:center;padding:9px 0;border-bottom:1px solid var(--divider);font-size:13px;}
+    .s-row{display:flex;justify-content:space-between;align-items:center;padding:9px 0;border-bottom:1px solid var(--div);font-size:13px;}
     .s-row:last-child{border-bottom:none;}
     .s-lbl{color:var(--muted);}
     .ok{color:var(--green);}
     .warn{color:var(--amber);}
     .err{color:var(--red);}
-
-    /* ── Signals view ─────────────────────────────────── */
-    .sig-table{width:100%;border-collapse:collapse;}
-    .sig-table th{text-align:left;padding:8px 12px;font-size:11px;text-transform:uppercase;letter-spacing:.06em;color:var(--faint);border-bottom:1px solid var(--border);}
-    .sig-table td{padding:10px 12px;border-bottom:1px solid var(--divider);font-size:13px;vertical-align:middle;}
-    .sig-table tr:last-child td{border-bottom:none;}
-    .sig-table tr:hover td{background:var(--surface2);}
-
-    /* ── Alerts full view ─────────────────────────────── */
-    .alerts-full{display:grid;gap:10px;}
-
-    /* ── Empty ────────────────────────────────────────── */
     .empty{color:var(--faint);font-size:13px;padding:20px;text-align:center;}
 
-    /* ── Chart sym select ─────────────────────────────── */
-    select.sym-sel{background:var(--surface2);border:1px solid var(--border);color:var(--text);border-radius:8px;padding:4px 8px;font-size:12px;cursor:pointer;font-family:var(--font);}
-
-    @media(max-width:1100px){.col2,.kpi-bar{grid-template-columns:1fr;}.shell{grid-template-columns:1fr;}.sidebar{height:auto;position:relative;flex-direction:row;flex-wrap:wrap;padding:12px;gap:4px;}.sidebar-brand{border-bottom:none;padding-bottom:0;margin-bottom:0;}.sidebar-footer{display:none;}.nav-label{display:none;}}
-    @media(max-width:640px){.ticker-grid{grid-template-columns:repeat(2,1fr);}.view{padding:12px;}}
+    @media(max-width:1100px){
+      .shell{grid-template-columns:1fr;}
+      .sidebar{height:auto;position:relative;flex-direction:row;flex-wrap:wrap;padding:10px;gap:2px;}
+      .brand{border-bottom:none;padding-bottom:0;margin-bottom:0;}
+      .sidebar-foot,.nav-section{display:none;}
+      .scanner-head,.scanner-row{grid-template-columns:70px 1fr 80px 80px 80px;}
+      .scanner-head span:nth-child(6),.scanner-head span:nth-child(7),
+      .scanner-row>*:nth-child(6),.scanner-row>*:nth-child(7){display:none;}
+      .two-col{grid-template-columns:1fr;}
+    }
+    @media(max-width:640px){
+      .sc-levels{grid-template-columns:1fr;}
+      .signal-card{grid-template-columns:1fr;}
+      .view{padding:12px;}
+    }
   </style>
 </head>
 <body>
 <div class="shell">
 
-  <!-- ── Sidebar ──────────────────────────────────────── -->
+  <!-- Sidebar -->
   <aside class="sidebar">
-    <div class="sidebar-brand">
-      <div class="brand-dot">
+    <div class="brand">
+      <div class="brand-icon">
         <svg viewBox="0 0 24 24"><path d="M5 18L12 5l7 13"/><path d="M8.5 12h7"/></svg>
       </div>
       <div>
         <div class="brand-name">Money Penny</div>
-        <div class="brand-sub">Trading signals</div>
+        <div class="brand-sub">Signal engine</div>
       </div>
     </div>
 
-    <div class="nav-label">Navigation</div>
-    <button class="nav-btn active" data-view="overview">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
-      Overview
+    <button class="nav-btn active" data-view="dashboard">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+      Dashboard
     </button>
-    <button class="nav-btn" data-view="signals">
+    <button class="nav-btn" data-view="scanner">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
-      Signals
+      Scanner
+    </button>
+    <button class="nav-btn" data-view="chart">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/><rect x="3" y="3" width="18" height="18" rx="2" ry="2" stroke-width="1.2"/></svg>
+      Chart
     </button>
     <button class="nav-btn" data-view="alerts">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
@@ -169,486 +199,539 @@
       System
     </button>
 
-    <div class="sidebar-footer">
-      <div class="conn-pill">
-        <span class="conn-dot" id="conn-dot"></span>
+    <div class="sidebar-foot">
+      <div class="conn-row">
+        <span class="dot" id="conn-dot"></span>
         <span id="conn-label">Connecting…</span>
       </div>
-      <div class="last-up" id="last-up"></div>
+      <div class="foot-time" id="foot-time"></div>
     </div>
   </aside>
 
-  <!-- ── Main ─────────────────────────────────────────── -->
   <div class="main">
     <header class="topbar">
-      <div>
-        <div class="page-title" id="page-title">Overview</div>
-      </div>
-      <div style="display:flex;align-items:center;gap:16px;">
-        <span class="topbar-meta" id="topbar-meta">Loading…</span>
-        <span style="font-size:12px;color:var(--faint);" id="last-refresh"></span>
+      <div class="page-title" id="page-title">Dashboard</div>
+      <div class="topbar-right">
+        <span id="market-status"></span>
+        <span id="last-refresh"></span>
       </div>
     </header>
 
-    <!-- ────────────────────────── OVERVIEW ────────────────────────────── -->
-    <div class="view active" id="view-overview">
+    <!-- ════════════════════ DASHBOARD ════════════════════ -->
+    <div class="view active" id="view-dashboard">
 
-      <!-- Price strip -->
       <div>
-        <div style="font-size:11px;text-transform:uppercase;letter-spacing:.06em;color:var(--faint);margin-bottom:10px;">Live prices — last seen from backend</div>
-        <div class="ticker-grid" id="ticker-strip"></div>
+        <div class="sec-label" style="margin-bottom:10px;">Active signals — take action</div>
+        <div class="signal-hero" id="signal-cards">
+          <div class="no-signals">No active signals right now. Scanner watching all 10 symbols every 5s.</div>
+        </div>
       </div>
 
-      <!-- KPI bar -->
-      <div class="kpi-bar">
-        <div class="kpi"><div class="kpi-lbl">Ready signals</div><div class="kpi-val" id="kpi-ready">—</div><div class="kpi-sub" id="kpi-ready-sub">loading</div></div>
-        <div class="kpi"><div class="kpi-lbl">Alerts today</div><div class="kpi-val" id="kpi-alerts">—</div><div class="kpi-sub" id="kpi-alerts-sub">loading</div></div>
-        <div class="kpi"><div class="kpi-lbl">Worker</div><div class="kpi-val" style="font-size:18px;" id="kpi-worker">—</div><div class="kpi-sub" id="kpi-worker-sub">loading</div></div>
-        <div class="kpi"><div class="kpi-lbl">Last poll</div><div class="kpi-val" style="font-size:16px;" id="kpi-poll">—</div><div class="kpi-sub">from system_state</div></div>
-      </div>
-
-      <!-- Chart + feed -->
-      <div class="col2">
-        <div class="panel">
-          <div class="ph">
-            <div><div class="ph-eye">Price chart</div><div class="ph-title" id="chart-title">SPY — Price · VWAP · EMA20</div></div>
-            <select class="sym-sel" id="chart-sym-sel">
-              <option value="SPY">SPY</option><option value="QQQ">QQQ</option><option value="IWM">IWM</option>
-              <option value="AAPL">AAPL</option><option value="NVDA">NVDA</option><option value="TSLA">TSLA</option>
-              <option value="AMZN">AMZN</option><option value="META">META</option><option value="MSFT">MSFT</option><option value="GOOGL">GOOGL</option>
-            </select>
+      <div>
+        <div class="sec-label" style="margin-bottom:10px;">Scanner — all symbols</div>
+        <div class="scanner">
+          <div class="scanner-head">
+            <span>Symbol</span><span>Price</span><span>vs VWAP</span><span>vs EMA20</span><span>State</span><span>Score</span><span>Quality</span>
           </div>
-          <div class="pb">
-            <canvas id="priceChart"></canvas>
-            <div class="empty" id="chart-empty" style="display:none;">No data yet for this symbol. Populates as alerts come in.</div>
+          <div id="scanner-rows-dash"></div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- ════════════════════ SCANNER ════════════════════ -->
+    <div class="view" id="view-scanner">
+      <div class="sec-label" style="margin-bottom:10px;">Full scanner — ranked by setup quality</div>
+      <div class="scanner">
+        <div class="scanner-head">
+          <span>Symbol</span><span>Price</span><span>vs VWAP</span><span>vs EMA20</span><span>State</span><span>Score</span><span>Quality</span>
+        </div>
+        <div id="scanner-rows-full"></div>
+      </div>
+    </div>
+
+    <!-- ════════════════════ CHART ════════════════════ -->
+    <div class="view" id="view-chart">
+      <div class="chart-panel">
+        <div class="chart-head">
+          <div class="chart-title" id="chart-main-title">SPY — intraday</div>
+          <div class="chart-legend">
+            <div class="leg-item"><div class="leg-line" style="background:var(--teal)"></div>Price</div>
+            <div class="leg-item"><div class="leg-dashed" style="border-color:var(--blue)"></div>VWAP</div>
+            <div class="leg-item"><div class="leg-dashed" style="border-color:var(--amber)"></div>EMA20</div>
+            <div class="leg-item"><div class="leg-dashed" style="border-color:var(--purple)"></div>PDH</div>
+            <div class="leg-item"><div class="leg-dashed" style="border-color:#6366f1"></div>PDL</div>
+            <div class="leg-item"><div class="leg-dashed" style="border-color:var(--faint)"></div>S/R</div>
           </div>
+          <select class="sym-sel" id="chart-sym-sel">
+            <option value="SPY">SPY</option><option value="QQQ">QQQ</option><option value="IWM">IWM</option>
+            <option value="AAPL">AAPL</option><option value="AMZN">AMZN</option><option value="META">META</option>
+            <option value="MSFT">MSFT</option><option value="NVDA">NVDA</option><option value="TSLA">TSLA</option>
+            <option value="GOOGL">GOOGL</option>
+          </select>
         </div>
-        <div class="panel">
-          <div class="ph"><div><div class="ph-eye">Alert feed</div><div class="ph-title">Latest signals</div></div></div>
-          <div class="pb"><div class="alert-scroll" id="alert-feed-overview"><div class="empty">Loading…</div></div></div>
+        <div class="chart-wrap">
+          <canvas id="mainChart"></canvas>
+          <div class="empty" id="chart-empty" style="display:none;">No price history yet for this symbol.</div>
         </div>
       </div>
 
-    </div><!-- /overview -->
-
-    <!-- ────────────────────────── SIGNALS ─────────────────────────────── -->
-    <div class="view" id="view-signals">
-      <div class="panel">
-        <div class="ph"><div><div class="ph-eye">Signal snapshots</div><div class="ph-title">All symbols — latest state</div></div></div>
-        <div class="pb">
-          <table class="sig-table" id="sig-table">
-            <thead><tr>
-              <th>Symbol</th><th>State</th><th>Setup</th><th>Score</th><th>Last seen</th>
-            </tr></thead>
-            <tbody id="sig-tbody"><tr><td colspan="5" class="empty">Loading…</td></tr></tbody>
-          </table>
-        </div>
-      </div>
-      <div class="col2">
+      <!-- Levels panel below chart -->
+      <div class="two-col">
         <div class="panel">
-          <div class="ph"><div><div class="ph-eye">Chart</div><div class="ph-title" id="sig-chart-title">SPY</div></div>
-            <select class="sym-sel" id="sig-chart-sym-sel">
-              <option value="SPY">SPY</option><option value="QQQ">QQQ</option><option value="IWM">IWM</option>
-              <option value="AAPL">AAPL</option><option value="NVDA">NVDA</option><option value="TSLA">TSLA</option>
-              <option value="AMZN">AMZN</option><option value="META">META</option><option value="MSFT">MSFT</option><option value="GOOGL">GOOGL</option>
-            </select>
-          </div>
-          <div class="pb"><canvas id="sigChart"></canvas></div>
+          <div class="ph"><div class="ph-title" id="levels-sym-title">SPY — key levels</div></div>
+          <div class="pb"><div class="s-list" id="levels-detail"></div></div>
         </div>
         <div class="panel">
-          <div class="ph"><div><div class="ph-eye">Latest snapshot</div><div class="ph-title" id="sig-levels-title">SPY</div></div></div>
-          <div class="pb"><div class="s-list" id="sig-levels"></div></div>
+          <div class="ph"><div class="ph-title">S/R levels</div></div>
+          <div class="pb"><div id="sr-levels-list" class="s-list"></div></div>
         </div>
       </div>
-    </div><!-- /signals -->
+    </div>
 
-    <!-- ────────────────────────── ALERTS ──────────────────────────────── -->
+    <!-- ════════════════════ ALERTS ════════════════════ -->
     <div class="view" id="view-alerts">
       <div style="display:flex;justify-content:space-between;align-items:center;gap:12px;">
-        <div style="font-size:11px;text-transform:uppercase;letter-spacing:.06em;color:var(--faint);">All alerts — newest first</div>
-        <select class="sym-sel" id="alerts-sym-filter">
+        <div class="sec-label">Alert history — newest first</div>
+        <select class="sym-sel" id="alerts-filter">
           <option value="">All symbols</option>
           <option value="SPY">SPY</option><option value="QQQ">QQQ</option><option value="IWM">IWM</option>
-          <option value="AAPL">AAPL</option><option value="NVDA">NVDA</option><option value="TSLA">TSLA</option>
-          <option value="AMZN">AMZN</option><option value="META">META</option><option value="MSFT">MSFT</option><option value="GOOGL">GOOGL</option>
+          <option value="AAPL">AAPL</option><option value="AMZN">AMZN</option><option value="META">META</option>
+          <option value="MSFT">MSFT</option><option value="NVDA">NVDA</option><option value="TSLA">TSLA</option>
+          <option value="GOOGL">GOOGL</option>
         </select>
       </div>
-      <div class="alerts-full" id="alerts-full"><div class="empty">Loading…</div></div>
-    </div><!-- /alerts -->
+      <div class="alert-list" id="alert-list"><div class="empty">Loading…</div></div>
+    </div>
 
-    <!-- ────────────────────────── SYSTEM ──────────────────────────────── -->
+    <!-- ════════════════════ SYSTEM ════════════════════ -->
     <div class="view" id="view-system">
-      <div class="col2">
+      <div class="two-col">
         <div class="panel">
-          <div class="ph"><div><div class="ph-eye">Pipeline</div><div class="ph-title">System status</div></div></div>
+          <div class="ph"><div class="ph-title">Pipeline health</div></div>
           <div class="pb">
             <div class="s-list">
-              <div class="s-row"><span class="s-lbl">Supabase connection</span><span id="sys-db">—</span></div>
+              <div class="s-row"><span class="s-lbl">Supabase</span><span id="sys-db">—</span></div>
               <div class="s-row"><span class="s-lbl">Backend worker</span><span id="sys-worker">—</span></div>
               <div class="s-row"><span class="s-lbl">Last worker poll</span><span id="sys-poll">—</span></div>
-              <div class="s-row"><span class="s-lbl">Worker started at</span><span id="sys-started">—</span></div>
-              <div class="s-row"><span class="s-lbl">Dashboard refresh</span><span class="ok">✅ Every 5 seconds</span></div>
-              <div class="s-row"><span class="s-lbl">Telegram bot</span><span class="ok">✅ Active</span></div>
-              <div class="s-row"><span class="s-lbl">Massive API</span><span class="ok">✅ Connected</span></div>
+              <div class="s-row"><span class="s-lbl">Worker started</span><span id="sys-started">—</span></div>
+              <div class="s-row"><span class="s-lbl">Dashboard refresh</span><span class="ok">Every 5s</span></div>
+              <div class="s-row"><span class="s-lbl">Telegram</span><span class="ok">Active</span></div>
+              <div class="s-row"><span class="s-lbl">Massive API</span><span class="ok">Connected</span></div>
             </div>
           </div>
         </div>
         <div class="panel">
-          <div class="ph"><div><div class="ph-eye">Stack</div><div class="ph-title">Architecture</div></div></div>
+          <div class="ph"><div class="ph-title">Stack</div></div>
           <div class="pb">
             <div class="s-list">
-              <div class="s-row"><span class="s-lbl">Data source</span><span>Massive.com REST API</span></div>
-              <div class="s-row"><span class="s-lbl">Signal engine</span><span>Python — VWAP + EMA</span></div>
-              <div class="s-row"><span class="s-lbl">Database</span><span>Supabase PostgreSQL</span></div>
-              <div class="s-row"><span class="s-lbl">Notifications</span><span>Telegram bot</span></div>
-              <div class="s-row"><span class="s-lbl">Frontend</span><span>Static HTML / Vercel</span></div>
-              <div class="s-row"><span class="s-lbl">Poll interval</span><span>5 seconds</span></div>
+              <div class="s-row"><span class="s-lbl">Signal logic</span><span>VWAP + EMA20 alignment</span></div>
+              <div class="s-row"><span class="s-lbl">Entry condition</span><span>Price > VWAP + vol confirm</span></div>
+              <div class="s-row"><span class="s-lbl">Stop</span><span>Below VWAP</span></div>
+              <div class="s-row"><span class="s-lbl">Target</span><span>1:2 risk/reward</span></div>
+              <div class="s-row"><span class="s-lbl">Enabled symbols</span><span>SPY, QQQ (signals)</span></div>
+              <div class="s-row"><span class="s-lbl">Monitored</span><span>All 10 symbols</span></div>
             </div>
           </div>
         </div>
       </div>
-      <div class="panel">
-        <div class="ph"><div><div class="ph-eye">Tracked symbols</div><div class="ph-title">10 symbols monitored</div></div></div>
-        <div class="pb"><div class="ticker-grid" id="sys-ticker-strip"></div></div>
-      </div>
-    </div><!-- /system -->
+    </div>
 
-  </div><!-- /main -->
-</div><!-- /shell -->
+  </div>
+</div>
 
 <script>
-  // ── Config ───────────────────────────────────────────────────────────────
-  const SUPABASE_URL = 'https://golqsjxpivryqwyaxwhl.supabase.co';
-  const SUPABASE_KEY = 'sb_publishable_vXYHSU2AeV4ppOHo1vIozw_qtXJAcia';
-  const SYMBOLS = ['SPY','QQQ','IWM','AAPL','AMZN','META','MSFT','NVDA','TSLA','GOOGL'];
+const SUPABASE_URL = 'https://golqsjxpivryqwyaxwhl.supabase.co';
+const SUPABASE_KEY = 'sb_publishable_vXYHSU2AeV4ppOHo1vIozw_qtXJAcia';
+const SYMBOLS = ['SPY','QQQ','IWM','AAPL','AMZN','META','MSFT','NVDA','TSLA','GOOGL'];
 
-  async function db(table, params='') {
-    const r = await fetch(`${SUPABASE_URL}/rest/v1/${table}${params}`, {
-      headers:{'apikey':SUPABASE_KEY,'Authorization':'Bearer '+SUPABASE_KEY,'Content-Type':'application/json'}
+async function db(table, params='') {
+  const r = await fetch(`${SUPABASE_URL}/rest/v1/${table}${params}`, {
+    headers:{'apikey':SUPABASE_KEY,'Authorization':'Bearer '+SUPABASE_KEY}
+  });
+  if (!r.ok) throw new Error(`${r.status}: ${await r.text()}`);
+  return r.json();
+}
+
+// ── Nav ───────────────────────────────────────────────────────────────────
+const viewNames = {dashboard:'Dashboard',scanner:'Scanner',chart:'Chart',alerts:'Alerts',system:'System'};
+document.querySelectorAll('.nav-btn[data-view]').forEach(btn => {
+  btn.addEventListener('click', () => {
+    const v = btn.dataset.view;
+    document.querySelectorAll('.nav-btn').forEach(b => b.classList.toggle('active', b === btn));
+    document.querySelectorAll('.view').forEach(el => el.classList.toggle('active', el.id === `view-${v}`));
+    document.getElementById('page-title').textContent = viewNames[v];
+  });
+});
+
+// ── State ─────────────────────────────────────────────────────────────────
+const prices = {};   // { SYM: {price,vwap,ema20,score,state,ts} }
+const levels = {};   // { SYM: {prev_day_high,prev_day_low,prev_day_close,sr_levels} }
+
+// ── Chart ─────────────────────────────────────────────────────────────────
+let chartSym = 'SPY';
+
+// Custom plugin to draw horizontal level lines
+const hLinesPlugin = {
+  id: 'hlines',
+  afterDraw(chart, _, opts) {
+    if (!opts.lines?.length) return;
+    const {ctx, scales: {x, y}} = chart;
+    opts.lines.forEach(l => {
+      const yp = y.getPixelForValue(l.value);
+      if (yp < y.top || yp > y.bottom) return;
+      ctx.save();
+      ctx.beginPath();
+      ctx.moveTo(x.left, yp);
+      ctx.lineTo(x.right, yp);
+      ctx.strokeStyle = l.color || '#666';
+      ctx.lineWidth = l.width || 1;
+      ctx.setLineDash(l.dash || [4,4]);
+      ctx.globalAlpha = l.alpha || 0.7;
+      ctx.stroke();
+      ctx.globalAlpha = 1;
+      ctx.font = '10px ui-monospace,monospace';
+      ctx.fillStyle = l.color || '#666';
+      ctx.fillText(l.label || '', x.right - 55, yp - 3);
+      ctx.restore();
     });
-    if (!r.ok) throw new Error(`${r.status}: ${await r.text()}`);
-    return r.json();
   }
+};
+Chart.register(hLinesPlugin);
 
-  // ── Navigation ────────────────────────────────────────────────────────────
-  const viewTitles = {overview:'Overview',signals:'Signals',alerts:'Alerts',system:'System'};
-  document.querySelectorAll('.nav-btn').forEach(btn => {
-    btn.addEventListener('click', () => {
-      const v = btn.dataset.view;
-      document.querySelectorAll('.nav-btn').forEach(b=>b.classList.toggle('active', b===btn));
-      document.querySelectorAll('.view').forEach(el=>el.classList.toggle('active', el.id===`view-${v}`));
-      document.getElementById('page-title').textContent = viewTitles[v];
+const mainChart = new Chart(document.getElementById('mainChart'), {
+  type: 'line',
+  data: {labels:[], datasets:[
+    {label:'Price', data:[], borderColor:'#14b8a6', borderWidth:2.5, tension:.3, pointRadius:0, fill:false},
+    {label:'VWAP',  data:[], borderColor:'#3b82f6', borderWidth:1.5, tension:.3, pointRadius:0, borderDash:[5,4], fill:false},
+    {label:'EMA20', data:[], borderColor:'#f59e0b', borderWidth:1.5, tension:.3, pointRadius:0, borderDash:[3,3], fill:false},
+  ]},
+  options: {
+    responsive:true, maintainAspectRatio:false, animation:false,
+    plugins:{
+      legend:{display:false},
+      hlines:{lines:[]},
+    },
+    scales:{
+      x:{ticks:{color:'#42424f',font:{size:10},maxTicksLimit:8},grid:{color:'#1c1c23'}},
+      y:{ticks:{color:'#42424f',font:{size:10}},grid:{color:'#1c1c23'}}
+    }
+  }
+});
+
+document.getElementById('chart-sym-sel').addEventListener('change', e => {
+  chartSym = e.target.value;
+  document.getElementById('chart-main-title').textContent = `${chartSym} — intraday`;
+  document.getElementById('levels-sym-title').textContent = `${chartSym} — key levels`;
+  updateChart();
+  renderLevelsPanel();
+});
+
+async function updateChart() {
+  const data = await db('alerts', `?select=context,created_at&ticker=eq.${chartSym}&order=created_at.asc&limit=40`);
+  const pts = (data||[]).filter(d => d.context?.entry_price);
+  const emEl = document.getElementById('chart-empty');
+
+  if (!pts.length) {
+    document.getElementById('mainChart').style.display = 'none';
+    emEl.style.display = 'block';
+    return;
+  }
+  document.getElementById('mainChart').style.display = '';
+  emEl.style.display = 'none';
+
+  mainChart.data.labels = pts.map(d => new Date(d.created_at).toLocaleTimeString([], {hour:'2-digit',minute:'2-digit',second:'2-digit'}));
+  mainChart.data.datasets[0].data = pts.map(d => d.context.entry_price || null);
+  mainChart.data.datasets[1].data = pts.map(d => d.context.vwap_at_entry || null);
+  mainChart.data.datasets[2].data = pts.map(d => d.context.ema20_at_entry || null);
+
+  // Build horizontal lines from session levels
+  const lvl = levels[chartSym];
+  const hlines = [];
+  if (lvl) {
+    if (lvl.prev_day_high) hlines.push({value:lvl.prev_day_high, color:'#a855f7', dash:[6,3], label:`PDH ${lvl.prev_day_high}`, alpha:.8, width:1.5});
+    if (lvl.prev_day_low)  hlines.push({value:lvl.prev_day_low,  color:'#6366f1', dash:[6,3], label:`PDL ${lvl.prev_day_low}`,  alpha:.8, width:1.5});
+    (lvl.sr_levels||[]).forEach(l => {
+      hlines.push({value:l, color:'#42424f', dash:[3,5], label:`${l}`, alpha:.6, width:1});
     });
+  }
+  mainChart.options.plugins.hlines.lines = hlines;
+  mainChart.update('none');
+}
+
+// ── Load session levels ───────────────────────────────────────────────────
+async function loadLevels() {
+  const data = await db('signal_snapshots', '?select=ticker,payload,created_at&setup_family=eq.SESSION&setup_state=eq.LEVELS&order=created_at.desc&limit=50');
+  const seen = {};
+  (data||[]).forEach(row => {
+    if (!seen[row.ticker] && row.payload) {
+      seen[row.ticker] = row.payload;
+      levels[row.ticker] = row.payload;
+    }
+  });
+}
+
+function renderLevelsPanel() {
+  const sym = chartSym;
+  const lvl = levels[sym];
+  const el = document.getElementById('levels-detail');
+  const srEl = document.getElementById('sr-levels-list');
+  if (!lvl) {
+    el.innerHTML = '<div class="empty">Levels load at worker startup.</div>';
+    srEl.innerHTML = '';
+    return;
+  }
+  const p = prices[sym];
+  const priceTxt = p ? `$${(+p.price).toFixed(2)}` : '—';
+  el.innerHTML = `
+    <div class="s-row"><span class="s-lbl">Current price</span><span>${priceTxt}</span></div>
+    <div class="s-row"><span class="s-lbl">Prev day high</span><span style="color:var(--purple)">$${lvl.prev_day_high||'—'}</span></div>
+    <div class="s-row"><span class="s-lbl">Prev day low</span><span style="color:#6366f1">$${lvl.prev_day_low||'—'}</span></div>
+    <div class="s-row"><span class="s-lbl">Prev day close</span><span>$${lvl.prev_day_close||'—'}</span></div>
+    <div class="s-row"><span class="s-lbl">Prev day open</span><span>$${lvl.prev_day_open||'—'}</span></div>
+    <div class="s-row"><span class="s-lbl">Source</span><span class="${lvl.source==='live'?'ok':'warn'}">${lvl.source==='live'?'Live Massive API':'Mock data'}</span></div>
+  `;
+  srEl.innerHTML = (lvl.sr_levels||[]).map(l => {
+    const p2 = p?.price;
+    const dist = p2 ? ((l - p2) / p2 * 100).toFixed(2) : null;
+    const cls = dist ? (parseFloat(dist) > 0 ? 'ok' : 'warn') : '';
+    return `<div class="s-row"><span class="s-lbl">$${l}</span><span class="${cls}">${dist ? dist+'%' : '—'}</span></div>`;
+  }).join('') || '<div class="empty">No S/R data.</div>';
+}
+
+// ── Load prices from signal_snapshots ─────────────────────────────────────
+async function loadPrices() {
+  const [snaps, alerts] = await Promise.all([
+    db('signal_snapshots', '?select=ticker,setup_state,score,payload,created_at&setup_family=eq.PRICE&order=created_at.desc&limit=100'),
+    db('alerts', '?select=ticker,context,created_at,priority&order=created_at.desc&limit=200'),
+  ]);
+
+  SYMBOLS.forEach(s => { delete prices[s]; });
+
+  (snaps||[]).forEach(row => {
+    const s = row.ticker;
+    if (!prices[s] && row.payload?.price) {
+      prices[s] = {price:row.payload.price, vwap:row.payload.vwap, ema20:row.payload.ema20, score:row.score||0, state:'', ts:row.created_at};
+    }
   });
 
-  // ── Price store ───────────────────────────────────────────────────────────
-  const store = {}; // { SYM: {price, vwap, ema20, score, state, ts} }
-
-  async function loadPrices() {
-    // signal_snapshots has a PRICE row for every symbol every 5s (from updated worker)
-    // alerts has signal state for SPY/QQQ when signals fire
-    const [snaps, alerts] = await Promise.all([
-      db('signal_snapshots','?select=ticker,setup_state,score,payload,created_at&order=created_at.desc&limit=200'),
-      db('alerts','?select=ticker,context,created_at,priority&order=created_at.desc&limit=200'),
-    ]);
-
-    SYMBOLS.forEach(s => { delete store[s]; });
-
-    // Primary: PRICE snapshots give live price/vwap/ema for every symbol
-    (snaps||[]).forEach(row => {
-      const s = row.ticker;
-      if (!store[s] && row.payload?.price) {
-        store[s] = {
-          price: row.payload.price,
-          vwap:  row.payload.vwap,
-          ema20: row.payload.ema20,
-          score: row.score,
-          state: (row.setup_state === 'LIVE' || row.setup_state === 'PRICE') ? '' : (row.setup_state || ''),
-          ts:    row.created_at,
-        };
+  (alerts||[]).forEach(row => {
+    const s = row.ticker;
+    const st = row.context?.setup_state || row.priority || '';
+    if (prices[s] && /^(ready|watch)$/i.test(st) && !prices[s]._sig) {
+      prices[s].state = st; prices[s]._sig = true;
+      if (row.context) {
+        prices[s].entry  = row.context.entry_price;
+        prices[s].vwap   = row.context.vwap_at_entry || prices[s].vwap;
+        prices[s].ema20  = row.context.ema20_at_entry || prices[s].ema20;
+        prices[s].score  = row.context.setup_score || prices[s].score;
+        prices[s].reason = row.context.reason;
+        prices[s].sigTs  = row.created_at;
       }
-    });
+    }
+    if (!prices[s] && row.context?.entry_price) {
+      prices[s] = {price:row.context.entry_price, vwap:row.context.vwap_at_entry, ema20:row.context.ema20_at_entry, score:row.context.setup_score||0, state:st, ts:row.created_at};
+    }
+  });
+}
 
-    // Overlay: pull signal state (READY/WATCH) from alerts
-    (alerts||[]).forEach(row => {
-      const s = row.ticker;
-      const sigState = row.context?.setup_state || row.priority || '';
-      if (store[s] && /^(ready|watch)$/i.test(sigState) && !store[s]._sig) {
-        store[s].state = sigState;
-        store[s]._sig = true;
-      }
-      // Fallback for symbols with no PRICE snapshot yet
-      if (!store[s] && row.context?.entry_price) {
-        store[s] = {
-          price: row.context.entry_price,
-          vwap:  row.context.vwap_at_entry,
-          ema20: row.context.ema20_at_entry,
-          score: row.context.setup_score,
-          state: sigState,
-          ts:    row.created_at,
-        };
-      }
-    });
+// ── Signal cards ──────────────────────────────────────────────────────────
+function renderSignalCards() {
+  const el = document.getElementById('signal-cards');
+  const active = SYMBOLS.map(s => prices[s]).filter(d => d && /^(ready|watch)$/i.test(d.state));
 
-    renderTickerStrip('ticker-strip');
-    renderTickerStrip('sys-ticker-strip');
-    renderSigLevels();
+  if (!active.length) {
+    el.innerHTML = '<div class="no-signals">No active signals right now. Scanner watching all 10 symbols every 5s.</div>';
+    return;
   }
 
-  // ── Ticker strip renderer ─────────────────────────────────────────────────
-  function renderTickerStrip(elId) {
-    const el = document.getElementById(elId);
-    if (!el) return;
-    el.innerHTML = '';
-    SYMBOLS.forEach(sym => {
-      const d = store[sym];
-      const ready = d && /^ready$/i.test(d.state);
-      const watch = d && /^watch$/i.test(d.state);
-      const card = document.createElement('div');
-      card.className = `t-card${ready?' sig-ready':watch?' sig-watch':''}`;
-      if (d?.price) {
-        const up = d.vwap && d.price > d.vwap;
-        card.innerHTML = `
-          <div class="t-sym">${sym}</div>
-          <div class="t-price ${up?'up':'dn'}">$${(+d.price).toFixed(2)}</div>
-          <div class="t-rows">
-            <div class="t-row"><span>VWAP</span><span>${d.vwap?'$'+(+d.vwap).toFixed(2):'—'}</span></div>
-            <div class="t-row"><span>EMA20</span><span>${d.ema20?'$'+(+d.ema20).toFixed(2):'—'}</span></div>
-            <div class="t-row"><span>vs VWAP</span><span style="color:${up?'var(--green)':'var(--red)'}">${up?'▲ Above':'▼ Below'}</span></div>
+  el.innerHTML = '';
+  active.forEach(d => {
+    const ready = /ready/i.test(d.state);
+    const entry  = d.entry || d.price;
+    const stop   = d.vwap ? +(d.vwap * 0.998).toFixed(2) : null;   // just below VWAP
+    const risk   = stop ? entry - stop : null;
+    const target = risk ? +(entry + risk * 2).toFixed(2) : null;    // 1:2 R:R
+    const age    = d.sigTs ? ago(d.sigTs) : ago(d.ts);
+
+    const card = document.createElement('div');
+    card.className = `signal-card ${ready?'':'watch'}`;
+    card.innerHTML = `
+      <div>
+        <div class="sc-top">
+          <span class="sc-sym">${d.ticker||'—'}</span>
+          <span class="sc-badge ${ready?'':'watch'}">${ready?'READY':'WATCH'}</span>
+          <span class="sc-age">${age}</span>
+        </div>
+        <div class="sc-levels">
+          <div class="sc-level">
+            <div class="sc-level-lbl">Entry</div>
+            <div class="sc-level-val entry">$${entry?.toFixed(2)||'—'}</div>
+            <div class="sc-level-sub">Price above VWAP</div>
           </div>
-          <div class="t-age">Updated ${ago(d.ts)}</div>
-          <div class="t-badge ${ready?'ready':watch?'watch':'none'}">${d.state?d.state.toUpperCase():'—'}</div>
-        `;
-      } else {
-        card.innerHTML = `<div class="t-sym">${sym}</div><div class="t-price fl">—</div><div class="t-age" style="margin-top:8px;">No data yet</div>`;
-      }
-      el.appendChild(card);
-    });
-  }
-
-  // ── Charts ────────────────────────────────────────────────────────────────
-  let chartSym = 'SPY';
-  let sigChartSym = 'SPY';
-
-  function mkChart(canvasId) {
-    return new Chart(document.getElementById(canvasId), {
-      type:'line',
-      data:{labels:[],datasets:[
-        {label:'Price',data:[],borderColor:'#14b8a6',borderWidth:2.5,tension:.3,pointRadius:0,fill:false},
-        {label:'VWAP', data:[],borderColor:'#3b82f6',borderWidth:1.5,tension:.3,pointRadius:0,borderDash:[5,4],fill:false},
-        {label:'EMA20',data:[],borderColor:'#f59e0b',borderWidth:1.5,tension:.3,pointRadius:0,borderDash:[3,3],fill:false},
-      ]},
-      options:{
-        responsive:true,maintainAspectRatio:false,animation:false,
-        plugins:{legend:{labels:{color:'#888896',font:{size:11}}}},
-        scales:{
-          x:{ticks:{color:'#44444f',font:{size:10},maxTicksLimit:8},grid:{color:'#1e1e24'}},
-          y:{ticks:{color:'#44444f',font:{size:10}},grid:{color:'#1e1e24'}}
-        }
-      }
-    });
-  }
-
-  const mainChart = mkChart('priceChart');
-  const sigChart  = mkChart('sigChart');
-
-  async function updateChart(sym, chart, emptyElId) {
-    const data = await db('alerts',`?select=context,created_at&ticker=eq.${sym}&order=created_at.asc&limit=30`);
-    const pts = (data||[]).filter(d=>d.context?.entry_price);
-    const emptyEl = document.getElementById(emptyElId);
-    if (pts.length===0) {
-      if (emptyEl) { document.getElementById(emptyElId.replace('empty','Chart') || 'priceChart').style.display='none'; emptyEl.style.display='block'; }
-      return;
-    }
-    if (emptyEl) { emptyEl.style.display='none'; }
-    chart.data.labels = pts.map(d=>new Date(d.created_at).toLocaleTimeString([],{hour:'2-digit',minute:'2-digit',second:'2-digit'}));
-    chart.data.datasets[0].data = pts.map(d=>d.context.entry_price||null);
-    chart.data.datasets[1].data = pts.map(d=>d.context.vwap_at_entry||null);
-    chart.data.datasets[2].data = pts.map(d=>d.context.ema20_at_entry||null);
-    chart.update('none');
-  }
-
-  document.getElementById('chart-sym-sel').addEventListener('change', e=>{
-    chartSym = e.target.value;
-    document.getElementById('chart-title').textContent = `${chartSym} — Price · VWAP · EMA20`;
-    updateChart(chartSym, mainChart, 'chart-empty');
-  });
-
-  document.getElementById('sig-chart-sym-sel').addEventListener('change', e=>{
-    sigChartSym = e.target.value;
-    document.getElementById('sig-chart-title').textContent = sigChartSym;
-    updateChart(sigChartSym, sigChart, null);
-    renderSigLevels();
-  });
-
-  // ── Signal levels panel ───────────────────────────────────────────────────
-  function renderSigLevels() {
-    const sym = sigChartSym;
-    const d = store[sym];
-    document.getElementById('sig-levels-title').textContent = `${sym} — latest`;
-    const el = document.getElementById('sig-levels');
-    if (!el) return;
-    if (!d?.price) { el.innerHTML='<div class="empty">No data yet.</div>'; return; }
-    const up = d.vwap && d.price > d.vwap;
-    el.innerHTML = `
-      <div class="s-row"><span class="s-lbl">Price</span><span class="${up?'ok':'warn'}">$${(+d.price).toFixed(2)}</span></div>
-      <div class="s-row"><span class="s-lbl">VWAP</span><span>${d.vwap?'$'+(+d.vwap).toFixed(2):'—'}</span></div>
-      <div class="s-row"><span class="s-lbl">EMA20</span><span>${d.ema20?'$'+(+d.ema20).toFixed(2):'—'}</span></div>
-      <div class="s-row"><span class="s-lbl">vs VWAP</span><span class="${up?'ok':'warn'}">${up?'▲ Above':'▼ Below'}</span></div>
-      <div class="s-row"><span class="s-lbl">Score</span><span>${d.score?(+d.score).toFixed(2):'—'}</span></div>
-      <div class="s-row"><span class="s-lbl">State</span><span class="${/ready/i.test(d.state)?'ok':/watch/i.test(d.state)?'warn':''}">${d.state||'—'}</span></div>
-      <div class="s-row"><span class="s-lbl">Last update</span><span>${ago(d.ts)}</span></div>
+          <div class="sc-level">
+            <div class="sc-level-lbl">Stop</div>
+            <div class="sc-level-val stop">$${stop||'—'}</div>
+            <div class="sc-level-sub">Below VWAP ${d.vwap?'$'+d.vwap.toFixed(2):''}</div>
+          </div>
+          <div class="sc-level">
+            <div class="sc-level-lbl">Target</div>
+            <div class="sc-level-val target">$${target||'—'}</div>
+            <div class="sc-level-sub">1:2 R/R ${risk?'($'+risk.toFixed(2)+' risk)':''}</div>
+          </div>
+        </div>
+      </div>
+      <div class="sc-right">
+        <div class="sc-score-wrap">
+          <div class="sc-score-num">${d.score?(+d.score).toFixed(2):'—'}</div>
+          <div class="sc-score-lbl">Score</div>
+        </div>
+        <div class="sc-reason ${ready?'':'watch'}">${d.reason||'Signal condition met'}</div>
+      </div>
     `;
-  }
+    // store ticker for reference
+    active.forEach(x => { if (x === d) d.ticker = d.ticker; });
+    el.appendChild(card);
+  });
+}
 
-  // ── Alert feed (shared renderer) ──────────────────────────────────────────
-  function renderAlerts(data, containerId) {
-    const el = document.getElementById(containerId);
-    if (!data||data.length===0) { el.innerHTML='<div class="empty">No alerts yet.</div>'; return; }
-    el.innerHTML='';
-    data.forEach(a=>{
-      const cls = /ready/i.test(a.priority)?'ready':/watch/i.test(a.priority)?'watch':'';
-      const ctx = a.context||{};
-      const chips = [
-        ctx.entry_price   ? `P: $${(+ctx.entry_price).toFixed(2)}`   : '',
-        ctx.vwap_at_entry ? `VWAP: $${(+ctx.vwap_at_entry).toFixed(2)}` : '',
-        ctx.ema20_at_entry? `EMA: $${(+ctx.ema20_at_entry).toFixed(2)}`  : '',
-        ctx.setup_score   ? `Score: ${(+ctx.setup_score).toFixed(2)}`    : '',
-      ].filter(Boolean);
-      const div = document.createElement('div');
-      div.className = `a-item ${cls}`;
-      div.innerHTML = `
-        <div class="a-top"><div class="a-head">${a.headline||a.ticker}</div><div class="a-time">${new Date(a.created_at).toLocaleTimeString()}</div></div>
-        <div class="a-msg">${a.message||''}</div>
-        ${chips.length?`<div class="a-chips">${chips.map(c=>`<span class="chip">${c}</span>`).join('')}</div>`:''}
-      `;
-      el.appendChild(div);
+// ── Scanner rows ──────────────────────────────────────────────────────────
+function renderScanner(elId) {
+  const el = document.getElementById(elId);
+  if (!el) return;
+
+  // Sort: READY first, then WATCH, then by score desc
+  const rows = SYMBOLS.map(s => ({sym:s, ...prices[s]}))
+    .sort((a,b) => {
+      const rank = x => /ready/i.test(x.state)?2:/watch/i.test(x.state)?1:0;
+      return rank(b) - rank(a) || (b.score||0) - (a.score||0);
     });
+
+  el.innerHTML = rows.map(r => {
+    const hasData = r.price != null;
+    const ready = /ready/i.test(r.state);
+    const watch = /watch/i.test(r.state);
+    const vwapDiff = r.price && r.vwap ? ((r.price - r.vwap) / r.vwap * 100) : null;
+    const emaDiff  = r.price && r.ema20 ? ((r.price - r.ema20) / r.ema20 * 100) : null;
+    const score = r.score || 0;
+    const barW = Math.min(100, Math.round(score * 100));
+    const priceClass = vwapDiff != null ? (vwapDiff >= 0 ? 'up' : 'dn') : '';
+
+    return `<div class="scanner-row${ready?' sig-ready':watch?' sig-watch':''}">
+      <span class="sr-sym">${r.sym}</span>
+      <span class="sr-price ${priceClass}">${hasData?'$'+(+r.price).toFixed(2):'—'}</span>
+      <span class="sr-cell ${vwapDiff!=null?(vwapDiff>=0?'pos':'neg'):''}">${vwapDiff!=null?(vwapDiff>=0?'+':'')+vwapDiff.toFixed(2)+'%':'—'}</span>
+      <span class="sr-cell ${emaDiff!=null?(emaDiff>=0?'pos':'neg'):''}">${emaDiff!=null?(emaDiff>=0?'+':'')+emaDiff.toFixed(2)+'%':'—'}</span>
+      <span>${ready?'<span class="state-pill ready">READY</span>':watch?'<span class="state-pill watch">WATCH</span>':'<span class="state-pill live">—</span>'}</span>
+      <span class="sr-cell">${score?(+score).toFixed(2):'—'}</span>
+      <span><div class="sr-bar-wrap"><div class="sr-bar" style="width:${barW}%;background:${ready?'var(--green)':watch?'var(--amber)':'var(--faint)'}"></div></div></span>
+    </div>`;
+  }).join('');
+}
+
+// ── Alerts ────────────────────────────────────────────────────────────────
+async function loadAlerts() {
+  const sym = document.getElementById('alerts-filter').value;
+  const filter = sym ? `&ticker=eq.${sym}` : '';
+  const data = await db('alerts', `?select=*&order=created_at.desc&limit=50${filter}`);
+  const el = document.getElementById('alert-list');
+  if (!data?.length) { el.innerHTML='<div class="empty">No alerts yet.</div>'; return; }
+  el.innerHTML = data.map(a => {
+    const cls = /ready/i.test(a.priority)?'ready':/watch/i.test(a.priority)?'watch':'';
+    const ctx = a.context||{};
+    const chips = [
+      ctx.entry_price   ? `P: $${(+ctx.entry_price).toFixed(2)}`   : '',
+      ctx.vwap_at_entry ? `VWAP: $${(+ctx.vwap_at_entry).toFixed(2)}` : '',
+      ctx.ema20_at_entry? `EMA: $${(+ctx.ema20_at_entry).toFixed(2)}`  : '',
+      ctx.setup_score   ? `Score: ${(+ctx.setup_score).toFixed(2)}`    : '',
+    ].filter(Boolean);
+    return `<div class="al-item ${cls}">
+      <div>
+        <div class="al-head">${a.headline||a.ticker}</div>
+        <div class="al-msg">${a.message||''}</div>
+        ${chips.length?`<div class="al-chips">${chips.map(c=>`<span class="chip">${c}</span>`).join('')}</div>`:''}
+      </div>
+      <div class="al-time">${new Date(a.created_at).toLocaleTimeString()}</div>
+    </div>`;
+  }).join('');
+}
+document.getElementById('alerts-filter').addEventListener('change', loadAlerts);
+
+// ── System state ──────────────────────────────────────────────────────────
+async function loadSystemState() {
+  const data = await db('system_state','?select=key,value,updated_at');
+  const m = {};
+  (data||[]).forEach(r => { m[r.key] = r; });
+  const ws = m['worker_status'], ps = m['last_polling_time'];
+  if (ws) {
+    const ok = ws.value?.status === 'RUNNING';
+    document.getElementById('sys-worker').textContent = ok?'✅ Running':'⚠️ '+ws.value?.status;
+    document.getElementById('sys-worker').className = ok?'ok':'warn';
+    if (ws.value?.started_at) document.getElementById('sys-started').textContent = new Date(ws.value.started_at).toLocaleTimeString();
   }
-
-  async function loadAlerts() {
-    const data = await db('alerts','?select=*&order=created_at.desc&limit=15');
-    renderAlerts(data,'alert-feed-overview');
+  if (ps?.value?.timestamp) {
+    document.getElementById('sys-poll').textContent = new Date(ps.value.timestamp).toLocaleTimeString() + ' (' + ago(ps.value.timestamp) + ')';
   }
+}
 
-  async function loadAlertsPage() {
-    const sym = document.getElementById('alerts-sym-filter').value;
-    const filter = sym ? `&ticker=eq.${sym}` : '';
-    const data = await db('alerts',`?select=*&order=created_at.desc&limit=50${filter}`);
-    renderAlerts(data,'alerts-full');
+// ── Market status ─────────────────────────────────────────────────────────
+function updateMarketStatus() {
+  const now = new Date();
+  const et = new Date(now.toLocaleString('en-US',{timeZone:'America/New_York'}));
+  const h = et.getHours(), m = et.getMinutes(), day = et.getDay();
+  const mins = h*60+m;
+  const el = document.getElementById('market-status');
+  if (day===0||day===6) { el.textContent='Market closed (weekend)'; el.style.color='var(--faint)'; return; }
+  if (mins>=930&&mins<960) { el.textContent='🟡 Pre-open (9:30–9:45)'; el.style.color='var(--amber)'; }
+  else if (mins>=960&&mins<1000) { el.textContent='🟢 Opening hour'; el.style.color='var(--green)'; }
+  else if (mins>=1000&&mins<1020) { el.textContent='🟢 Power hour'; el.style.color='var(--green)'; }
+  else if (mins>=930&&mins<960) { el.textContent='🟢 Market open'; el.style.color='var(--green)'; }
+  else if (mins>=930&&mins<990) { el.textContent='🟢 Market open'; el.style.color='var(--green)'; }
+  else if (mins>=990) { el.textContent='🔴 Market closed'; el.style.color='var(--red)'; }
+  else { el.textContent='Market closed'; el.style.color='var(--faint)'; }
+}
+
+// ── Helpers ───────────────────────────────────────────────────────────────
+function ago(iso) {
+  if (!iso) return '—';
+  const s = Math.floor((Date.now()-new Date(iso))/1000);
+  if (s<5)   return 'just now';
+  if (s<60)  return s+'s ago';
+  if (s<3600)return Math.floor(s/60)+'m ago';
+  return Math.floor(s/3600)+'h ago';
+}
+
+// ── Main refresh ──────────────────────────────────────────────────────────
+async function refresh() {
+  try {
+    await Promise.all([loadPrices(), loadLevels(), loadAlerts(), loadSystemState()]);
+
+    // Add ticker ref to prices objects for signal cards
+    SYMBOLS.forEach(s => { if (prices[s]) prices[s].ticker = s; });
+
+    renderSignalCards();
+    renderScanner('scanner-rows-dash');
+    renderScanner('scanner-rows-full');
+    renderLevelsPanel();
+    updateChart();
+    updateMarketStatus();
+
+    document.getElementById('conn-dot').className = 'dot';
+    document.getElementById('conn-label').textContent = 'Connected';
+    document.getElementById('sys-db').textContent = '✅ Connected';
+    document.getElementById('sys-db').className = 'ok';
+  } catch(e) {
+    console.error(e);
+    document.getElementById('conn-dot').className = 'dot dead';
+    document.getElementById('conn-label').textContent = 'Error';
   }
+  const t = new Date().toLocaleTimeString();
+  document.getElementById('last-refresh').textContent = t;
+  document.getElementById('foot-time').textContent = 'Updated '+t;
+}
 
-  document.getElementById('alerts-sym-filter').addEventListener('change', loadAlertsPage);
-
-  // ── Signal snapshots table ─────────────────────────────────────────────────
-  async function loadSignalTable() {
-    const data = await db('signal_snapshots','?select=*&order=created_at.desc&limit=100');
-    const byTicker = {};
-    (data||[]).forEach(r=>{ if(!byTicker[r.ticker]) byTicker[r.ticker]=r; });
-    const tbody = document.getElementById('sig-tbody');
-    const rows = Object.values(byTicker);
-    if (!rows.length) { tbody.innerHTML='<tr><td colspan="5" class="empty">No signal snapshots yet.</td></tr>'; return; }
-    tbody.innerHTML = rows.map(r=>{
-      const ready=/ready/i.test(r.setup_state);
-      const watch=/watch/i.test(r.setup_state);
-      const cls = ready?'ok':watch?'warn':'';
-      return `<tr>
-        <td><strong>${r.ticker}</strong></td>
-        <td><span class="t-badge ${ready?'ready':watch?'watch':'none'}" style="display:inline-flex;">${r.setup_state||'—'}</span></td>
-        <td>${r.setup_family||'—'}</td>
-        <td>${r.score?(+r.score).toFixed(2):'—'}</td>
-        <td style="color:var(--faint);font-family:var(--mono);font-size:12px;">${ago(r.created_at)}</td>
-      </tr>`;
-    }).join('');
-  }
-
-  // ── Stats + system state ──────────────────────────────────────────────────
-  async function loadStats() {
-    const today = new Date(); today.setHours(0,0,0,0);
-    const [aToday, readyS] = await Promise.all([
-      db('alerts',`?select=id&created_at=gte.${today.toISOString()}`),
-      db('signal_snapshots','?select=id&setup_state=eq.READY'),
-    ]);
-    document.getElementById('kpi-alerts').textContent = aToday?.length??0;
-    document.getElementById('kpi-alerts-sub').textContent = 'since midnight';
-    const r = readyS?.length??0;
-    document.getElementById('kpi-ready').textContent = r;
-    document.getElementById('kpi-ready-sub').textContent = r===1?'1 active':`${r} active`;
-  }
-
-  async function loadSystemState() {
-    const data = await db('system_state','?select=key,value,updated_at');
-    const m = {};
-    (data||[]).forEach(r=>{m[r.key]=r;});
-    const ws = m['worker_status'], ps = m['last_polling_time'];
-
-    if (ws) {
-      const s = ws.value?.status||'UNKNOWN';
-      const ok = s==='RUNNING';
-      const txt = ok?'✅ Running':`⚠️ ${s}`;
-      ['sys-worker','kpi-worker'].forEach(id=>{
-        const el = document.getElementById(id);
-        if(el){el.textContent=txt;el.className=ok?'ok':'warn';}
-      });
-      document.getElementById('kpi-worker-sub').textContent = ok?'Active':'Check backend';
-      const started = ws.value?.started_at;
-      if (started) {
-        const el = document.getElementById('sys-started');
-        if(el) el.textContent = new Date(started).toLocaleTimeString();
-      }
-    }
-
-    if (ps?.value?.timestamp) {
-      const t = new Date(ps.value.timestamp);
-      const a = ago(ps.value.timestamp);
-      document.getElementById('kpi-poll').textContent = t.toLocaleTimeString();
-      const sp = document.getElementById('sys-poll');
-      if(sp) sp.textContent = `${t.toLocaleTimeString()} (${a})`;
-    }
-  }
-
-  // ── Helpers ───────────────────────────────────────────────────────────────
-  function ago(iso) {
-    if (!iso) return '—';
-    const s = Math.floor((Date.now()-new Date(iso))/1000);
-    if (s<5)   return 'just now';
-    if (s<60)  return `${s}s ago`;
-    if (s<3600)return `${Math.floor(s/60)}m ago`;
-    return `${Math.floor(s/3600)}h ago`;
-  }
-
-  // ── Main refresh cycle ────────────────────────────────────────────────────
-  async function refresh() {
-    try {
-      await Promise.all([
-        loadPrices(),
-        loadAlerts(),
-        loadAlertsPage(),
-        loadSignalTable(),
-        loadStats(),
-        loadSystemState(),
-        updateChart(chartSym, mainChart, 'chart-empty'),
-        updateChart(sigChartSym, sigChart, null),
-      ]);
-
-      document.getElementById('conn-dot').className = 'conn-dot';
-      document.getElementById('conn-label').textContent = 'Supabase connected';
-      document.getElementById('sys-db')?.setAttribute('class','ok');
-      const sysDb = document.getElementById('sys-db');
-      if(sysDb) { sysDb.textContent='✅ Connected'; sysDb.className='ok'; }
-      document.getElementById('topbar-meta').textContent = 'Live · refreshes every 5s';
-    } catch(e) {
-      console.error('Refresh error:', e);
-      document.getElementById('conn-dot').className = 'conn-dot dead';
-      document.getElementById('conn-label').textContent = 'Connection error';
-      document.getElementById('topbar-meta').textContent = `Error: ${e.message?.slice(0,50)}`;
-    }
-    document.getElementById('last-refresh').textContent = new Date().toLocaleTimeString();
-    document.getElementById('last-up').textContent = 'Updated '+new Date().toLocaleTimeString();
-  }
-
-  refresh();
-  setInterval(refresh, 5000);
+refresh();
+setInterval(refresh, 5000);
 </script>
 </body>
 </html>
