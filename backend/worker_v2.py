@@ -171,7 +171,6 @@ def evaluate_signals(symbol: str, snap: Dict):
     State transitions:
     - WATCH: Setup detected, not yet ready
     - READY: Setup ready for entry
-    - TRIGGER: Entry triggered (future: when price hits level)
     - INVALIDATED: Setup failed
     - COOLDOWN: Waiting before re-evaluation
     """
@@ -181,9 +180,11 @@ def evaluate_signals(symbol: str, snap: Dict):
         return
     
     # Check cooldown
-    for setup_id in list(active_setups.get(symbol, {}).keys()):
-        if check_cooldown(symbol, setup_id):
-            return  # Still in cooldown
+    if symbol in cooldown_ends:
+        for setup_id in list(cooldown_ends[symbol].keys()):
+            if check_cooldown(symbol, setup_id):
+                logger.debug(f"{symbol}: Still in cooldown")
+                return  # Still in cooldown
     
     # Process as candle
     candle = process_candle(symbol, snap)
@@ -197,6 +198,7 @@ def evaluate_signals(symbol: str, snap: Dict):
     signal = signal_engine.evaluate_candle_stream(symbol, candle_history[symbol], snap)
     
     if not signal:
+        logger.debug(f"{symbol}: No signal")
         return
     
     # Handle signal
