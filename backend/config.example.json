@@ -1,0 +1,20 @@
+{
+  "massive": {
+    "api_key": "YOUR_MASSIVE_API_KEY",
+    "stocks_ws_url": "wss://socket.massive.com/stocks",
+    "options_ws_url": "wss://socket.massive.com/options",
+    "symbols": ["SPY", "QQQ", "IWM", "AAPL", "AMZN", "META", "MSFT", "NVDA", "TSLA", "GOOGL"]
+  },
+  "supabase": {
+    "url": "YOUR_SUPABASE_URL",
+    "service_role_key": "YOUR_SUPABASE_SERVICE_ROLE_KEY"
+  },
+  "telegram": {
+    "bot_token": "YOUR_BOT_TOKEN",
+    "chat_id": "YOUR_CHAT_ID"
+  },
+  "system": {
+    "poll_interval_seconds": 5,
+    "environment": "local"
+  }
+}

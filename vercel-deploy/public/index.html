@@ -1,0 +1,375 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Money Penny Control Center</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://api.fontshare.com/v2/css?f[]=satoshi@400,500,700&f[]=general-sans@500,600,700&display=swap" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <style>
+    :root, [data-theme="light"] {
+      --font-body: 'Satoshi', Inter, sans-serif;
+      --font-display: 'General Sans', Inter, sans-serif;
+      --text-xs: clamp(0.75rem, 0.7rem + 0.25vw, 0.875rem);
+      --text-sm: clamp(0.875rem, 0.8rem + 0.35vw, 1rem);
+      --text-base: clamp(1rem, 0.95rem + 0.25vw, 1.125rem);
+      --text-lg: clamp(1.125rem, 1rem + 0.75vw, 1.5rem);
+      --text-xl: clamp(1.5rem, 1.2rem + 1.25vw, 2rem);
+      --space-1: .25rem; --space-2: .5rem; --space-3: .75rem; --space-4: 1rem; --space-5: 1.25rem; --space-6: 1.5rem; --space-8: 2rem; --space-10: 2.5rem;
+      --color-bg: #f7f6f2; --color-surface:#f9f8f5; --color-surface-2:#fbfbf9; --color-surface-offset:#f3f0ec; --color-divider:#dcd9d5; --color-border:#d4d1ca;
+      --color-text:#28251d; --color-text-muted:#66645f; --color-text-faint:#9b9993; --color-text-inverse:#f9f8f4;
+      --color-primary:#01696f; --color-primary-hover:#0c4e54; --color-primary-highlight:#cedcd8;
+      --color-success:#437a22; --color-warning:#964219; --color-error:#a12c7b; --color-blue:#006494;
+      --radius-sm:.375rem; --radius-md:.5rem; --radius-lg:.75rem; --radius-xl:1rem; --radius-full:9999px;
+      --shadow-sm:0 1px 2px rgba(0,0,0,.06); --shadow-md:0 6px 18px rgba(0,0,0,.08); --shadow-lg:0 12px 36px rgba(0,0,0,.12);
+    }
+    [data-theme="dark"] {
+      --color-bg:#171614; --color-surface:#1c1b19; --color-surface-2:#201f1d; --color-surface-offset:#242320; --color-divider:#2c2a27; --color-border:#3a3835;
+      --color-text:#ece9e3; --color-text-muted:#a7a29a; --color-text-faint:#706d67; --color-text-inverse:#171614;
+      --color-primary:#4f98a3; --color-primary-hover:#70aeb8; --color-primary-highlight:#2f3b3d;
+      --color-success:#7fb25d; --color-warning:#d88e5e; --color-error:#db7ab5; --color-blue:#74add7;
+      --shadow-sm:0 1px 2px rgba(0,0,0,.2); --shadow-md:0 6px 18px rgba(0,0,0,.28); --shadow-lg:0 12px 36px rgba(0,0,0,.4);
+    }
+    * { box-sizing: border-box; margin:0; padding:0; }
+    body { font-family: var(--font-body); background: var(--color-bg); color: var(--color-text); min-height:100vh; }
+    button, input, select { font: inherit; color: inherit; }
+    .app { display:grid; grid-template-columns: 270px 1fr; min-height:100vh; }
+    .sidebar { background: var(--color-surface); border-right:1px solid var(--color-border); padding: var(--space-6); display:flex; flex-direction:column; gap: var(--space-6); }
+    .brand { display:flex; align-items:center; gap: var(--space-3); font-family: var(--font-display); font-size: var(--text-lg); font-weight:700; }
+    .brand-mark { width:36px; height:36px; border-radius:12px; background: linear-gradient(135deg, var(--color-primary-highlight), var(--color-surface-offset)); display:grid; place-items:center; border:1px solid var(--color-border); }
+    .brand-mark svg { width:20px; height:20px; }
+    .nav { display:grid; gap: var(--space-2); }
+    .nav button { text-align:left; padding: .875rem 1rem; border-radius: 12px; border:1px solid transparent; background: transparent; }
+    .nav button.active { background: var(--color-surface-offset); border-color: var(--color-border); }
+    .sidebar-card { background: var(--color-surface-2); border:1px solid var(--color-border); border-radius: var(--radius-xl); padding: var(--space-4); box-shadow: var(--shadow-sm); }
+    .main { display:flex; flex-direction:column; min-width:0; }
+    .topbar { position:sticky; top:0; z-index:5; backdrop-filter: blur(18px); background: color-mix(in srgb, var(--color-bg) 84%, transparent); border-bottom:1px solid var(--color-divider); padding: var(--space-4) var(--space-6); display:flex; justify-content:space-between; align-items:center; gap: var(--space-4); }
+    .topbar h1 { font-family: var(--font-display); font-size: var(--text-xl); }
+    .top-actions { display:flex; gap: var(--space-3); align-items:center; }
+    .btn { border:1px solid var(--color-border); background: var(--color-surface); padding: .8rem 1rem; border-radius: 12px; cursor:pointer; }
+    .btn.primary { background: var(--color-primary); color: var(--color-text-inverse); border-color: var(--color-primary); }
+    .workspace { padding: var(--space-6); display:grid; gap: var(--space-6); }
+    .grid { display:grid; gap: var(--space-6); }
+    .grid.kpis { grid-template-columns: repeat(4, minmax(0,1fr)); }
+    .grid.main-panels { grid-template-columns: 1.8fr 1fr; align-items:start; }
+    .card { background: var(--color-surface); border:1px solid var(--color-border); border-radius: 18px; box-shadow: var(--shadow-sm); overflow:hidden; }
+    .card-head { padding: var(--space-4) var(--space-4) 0; display:flex; justify-content:space-between; align-items:flex-start; gap:var(--space-4); }
+    .card-body { padding: var(--space-4); }
+    .eyebrow { color: var(--color-text-muted); font-size: var(--text-xs); text-transform: uppercase; letter-spacing: .08em; }
+    .metric { font-family: var(--font-display); font-size: 2rem; line-height:1; margin-top:.4rem; }
+    .sub { color: var(--color-text-muted); font-size: var(--text-sm); margin-top:.35rem; }
+    .pill { display:inline-flex; align-items:center; gap:.4rem; padding:.35rem .7rem; border-radius:999px; font-size: var(--text-xs); border:1px solid var(--color-border); }
+    .pill.good { background: color-mix(in srgb, var(--color-success) 10%, var(--color-surface)); color: var(--color-success); }
+    .pill.watch { background: color-mix(in srgb, var(--color-warning) 10%, var(--color-surface)); color: var(--color-warning); }
+    .rows { display:grid; gap: .85rem; }
+    .row { display:flex; justify-content:space-between; gap:1rem; align-items:center; padding:.8rem 0; border-bottom:1px solid var(--color-divider); }
+    .row:last-child { border-bottom:none; padding-bottom:0; }
+    .label { color: var(--color-text-muted); font-size: var(--text-sm); }
+    .value { font-weight:600; }
+    .watchlist { display:grid; gap: .75rem; }
+    .watch-item { display:grid; grid-template-columns: auto 1fr auto; gap: .8rem; align-items:center; padding:.9rem 1rem; border-radius: 14px; background: var(--color-surface-2); border:1px solid var(--color-border); }
+    .dot { width:10px; height:10px; border-radius:999px; background: var(--color-warning); }
+    .dot.good { background: var(--color-success); }
+    .heatmap { display:grid; grid-template-columns: repeat(5, 1fr); gap: .65rem; }
+    .heat { aspect-ratio: 1.1 / 1; border-radius: 14px; padding:.8rem; color:white; display:flex; flex-direction:column; justify-content:space-between; font-size: var(--text-xs); }
+    .h1{background:#0c4e54}.h2{background:#1d6a45}.h3{background:#996d10}.h4{background:#8a4e18}.h5{background:#7a2f56}
+    .alert-feed { display:grid; gap: .9rem; }
+    .alert { padding: 1rem; border-radius: 14px; background: var(--color-surface-2); border:1px solid var(--color-border); }
+    .split { display:grid; grid-template-columns: 1fr 1fr; gap: var(--space-6); }
+    .mini-code { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; background: var(--color-surface-offset); border:1px solid var(--color-border); padding:1rem; border-radius: 12px; font-size: .9rem; overflow:auto; }
+    .footer-note { color: var(--color-text-muted); font-size: var(--text-sm); }
+    canvas { width:100% !important; height:300px !important; }
+    @media (max-width: 1080px) {
+      .app { grid-template-columns: 1fr; }
+      .sidebar { border-right:none; border-bottom:1px solid var(--color-border); }
+      .grid.kpis, .grid.main-panels, .split { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <aside class="sidebar">
+      <div class="brand">
+        <div class="brand-mark" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M5 18L12 5l7 13"/><path d="M8.5 12h7"/></svg>
+        </div>
+        <div>
+          <div>Money Penny</div>
+          <div class="eyebrow">Control center</div>
+        </div>
+      </div>
+      <nav class="nav">
+        <button class="active">Overview</button>
+        <button>Signals</button>
+        <button>Heatmaps</button>
+        <button>Levels</button>
+        <button>Alerts</button>
+        <button>System</button>
+      </nav>
+      <div class="sidebar-card">
+        <div class="eyebrow">Fast launch stack</div>
+        <div class="rows" style="margin-top:1rem;">
+          <div class="row"><span class="label">Frontend</span><span class="value">Static HTML</span></div>
+          <div class="row"><span class="label">Backend</span><span class="value">Python worker</span></div>
+          <div class="row"><span class="label">Database</span><span class="value">Supabase</span></div>
+          <div class="row"><span class="label">Alerts</span><span class="value">Telegram</span></div>
+        </div>
+      </div>
+      <div class="sidebar-card">
+        <div class="eyebrow">Your focus</div>
+        <p class="sub" style="margin-top:.8rem;">SPY, QQQ, IWM plus Mag 7, with alerts for watch-worthy 0DTE and momentum setups.</p>
+      </div>
+    </aside>
+    <main class="main">
+      <header class="topbar">
+        <div>
+          <h1>Fast-build trading assistant</h1>
+          <div class="sub">Prototype + operator console + backend starter files</div>
+        </div>
+        <div class="top-actions">
+          <button class="btn" data-theme-toggle>Toggle theme</button>
+          <button class="btn primary">Deploy next</button>
+        </div>
+      </header>
+      <section class="workspace">
+        <div class="grid kpis">
+          <article class="card"><div class="card-body"><div class="eyebrow">Live candidates</div><div class="metric">4</div><div class="sub">2 ready, 2 watch</div></div></article>
+          <article class="card"><div class="card-body"><div class="eyebrow">Active symbols</div><div class="metric">10</div><div class="sub">SPY, QQQ, IWM, Mag 7</div></div></article>
+          <article class="card"><div class="card-body"><div class="eyebrow">Alerts today</div><div class="metric">17</div><div class="sub">Priority-filtered flow</div></div></article>
+          <article class="card"><div class="card-body"><div class="eyebrow">Data state</div><div class="metric">Live</div><div class="sub">Massive stream target</div></div></article>
+        </div>
+
+        <div class="grid main-panels">
+          <article class="card">
+            <div class="card-head">
+              <div>
+                <div class="eyebrow">Price map</div>
+                <h2 style="font-family:var(--font-display); font-size:1.3rem; margin-top:.35rem;">QQQ intraday context</h2>
+              </div>
+              <span class="pill good">VWAP above EMA stack</span>
+            </div>
+            <div class="card-body"><canvas id="priceChart"></canvas></div>
+          </article>
+          <article class="card">
+            <div class="card-head">
+              <div>
+                <div class="eyebrow">Watch queue</div>
+                <h2 style="font-family:var(--font-display); font-size:1.3rem; margin-top:.35rem;">Priority symbols</h2>
+              </div>
+            </div>
+            <div class="card-body watchlist">
+              <div class="watch-item"><span class="dot good"></span><div><strong>QQQ</strong><div class="label">VWAP reclaim + trend alignment</div></div><span class="pill good">Ready</span></div>
+              <div class="watch-item"><span class="dot"></span><div><strong>SPY</strong><div class="label">Opening drive nearing key high</div></div><span class="pill watch">Watch</span></div>
+              <div class="watch-item"><span class="dot"></span><div><strong>NVDA</strong><div class="label">Momentum continuation if high breaks</div></div><span class="pill watch">Watch</span></div>
+              <div class="watch-item"><span class="dot good"></span><div><strong>TSLA</strong><div class="label">Compression release setup</div></div><span class="pill good">Ready</span></div>
+            </div>
+          </article>
+        </div>
+
+        <div class="split">
+          <article class="card">
+            <div class="card-head"><div><div class="eyebrow">Levels</div><h2 style="font-family:var(--font-display); font-size:1.3rem; margin-top:.35rem;">Session map</h2></div></div>
+            <div class="card-body rows">
+              <div class="row"><span class="label">Premarket high</span><span class="value">487.42</span></div>
+              <div class="row"><span class="label">Cash open</span><span class="value">485.98</span></div>
+              <div class="row"><span class="label">ORB high</span><span class="value">486.66</span></div>
+              <div class="row"><span class="label">VWAP</span><span class="value">486.18</span></div>
+              <div class="row"><span class="label">20 EMA</span><span class="value">486.04</span></div>
+            </div>
+          </article>
+          <article class="card">
+            <div class="card-head"><div><div class="eyebrow">Contracts</div><h2 style="font-family:var(--font-display); font-size:1.3rem; margin-top:.35rem;">0DTE heatmap</h2></div></div>
+            <div class="card-body heatmap">
+              <div class="heat h1"><span>486C</span><strong>High flow</strong></div>
+              <div class="heat h2"><span>487C</span><strong>Strong bid</strong></div>
+              <div class="heat h3"><span>485C</span><strong>Watch</strong></div>
+              <div class="heat h4"><span>484P</span><strong>Fade</strong></div>
+              <div class="heat h5"><span>483P</span><strong>Hedge</strong></div>
+            </div>
+          </article>
+        </div>
+
+        <div class="split">
+          <article class="card">
+            <div class="card-head"><div><div class="eyebrow">Alert feed</div><h2 style="font-family:var(--font-display); font-size:1.3rem; margin-top:.35rem;">What gets sent to Telegram</h2></div></div>
+            <div class="card-body alert-feed">
+              <div class="alert"><strong>QQQ ready</strong><div class="sub">VWAP reclaim confirmed, EMA stack aligned, above opening range midpoint.</div></div>
+              <div class="alert"><strong>SPY watch</strong><div class="sub">Price approaching premarket high. Wait for break and hold or reclaim after sweep.</div></div>
+              <div class="alert"><strong>TSLA ready</strong><div class="sub">Momentum compression resolved. Volume expansion above trigger candle.</div></div>
+            </div>
+          </article>
+          <article class="card">
+            <div class="card-head"><div><div class="eyebrow">Architecture</div><h2 style="font-family:var(--font-display); font-size:1.3rem; margin-top:.35rem;">Fastest real build path</h2></div></div>
+            <div class="card-body rows">
+              <div class="row"><span class="label">1. Massive stream</span><span class="value">Worker</span></div>
+              <div class="row"><span class="label">2. Rules engine</span><span class="value">Python</span></div>
+              <div class="row"><span class="label">3. Store alerts</span><span class="value">Supabase</span></div>
+              <div class="row"><span class="label">4. Notify</span><span class="value">Telegram</span></div>
+              <div class="row"><span class="label">5. View live state</span><span class="value">Dashboard</span></div>
+            </div>
+          </article>
+        </div>
+
+        <article class="card">
+          <div class="card-head"><div><div class="eyebrow">Operator instructions</div><h2 style="font-family:var(--font-display); font-size:1.3rem; margin-top:.35rem;">What your computer bot should do next</h2></div></div>
+          <div class="card-body">
+            <div class="mini-code">1. Create a Supabase project and run backend/schema.sql\n2. Copy backend/config.example.json to config.json and add keys\n3. pip install -r backend/requirements.txt\n4. Run python backend/worker.py\n5. Serve this HTML or connect it to Supabase data\n6. Replace mock rules with your exact SPY/QQQ setup logic</div>
+            <p class="footer-note" style="margin-top:1rem;">This frontend is intentionally static-first so you can get a version running fast and then wire live data incrementally.</p>
+          </div>
+        </article>
+      </section>
+    </main>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.38.4/+esm"></script>
+  <script type="module">
+    import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.38.4/+esm';
+
+    // Supabase config
+    const SUPABASE_URL = 'https://golqsjxpivryqwyaxwhl.supabase.co';
+    const SUPABASE_ANON_KEY = 'sb_publishable_cVXHSU2Av4gpQho1vEzw_qtXJA';
+
+    const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+    // Theme toggle
+    (function(){
+      const t = document.querySelector('[data-theme-toggle]');
+      const r = document.documentElement;
+      let d = matchMedia('(prefers-color-scheme:dark)').matches ? 'dark' : 'light';
+      r.setAttribute('data-theme', d);
+      t.addEventListener('click', () => {
+        d = d === 'dark' ? 'light' : 'dark';
+        r.setAttribute('data-theme', d);
+      });
+    })();
+
+    // Fetch live alerts from Supabase
+    async function loadAlerts() {
+      try {
+        const { data, error } = await supabase
+          .from('alerts')
+          .select('*')
+          .order('created_at', { ascending: false })
+          .limit(10);
+        
+        if (error) throw error;
+        
+        const feedEl = document.querySelector('.alert-feed');
+        feedEl.innerHTML = '';
+        
+        if (data && data.length > 0) {
+          data.forEach(alert => {
+            const el = document.createElement('div');
+            el.className = 'alert';
+            el.innerHTML = `<strong>${alert.ticker} ${alert.priority}</strong><div class="sub">${alert.message}</div><div class="label" style="margin-top:0.5rem; font-size:0.75rem;">${new Date(alert.created_at).toLocaleTimeString()}</div>`;
+            feedEl.appendChild(el);
+          });
+        } else {
+          feedEl.innerHTML = '<div class="sub">No alerts yet. Waiting for trading signals...</div>';
+        }
+      } catch (err) {
+        console.error('Error loading alerts:', err);
+      }
+    }
+
+    // Fetch live signal snapshots (latest by ticker)
+    async function loadSignals() {
+      try {
+        const { data, error } = await supabase
+          .from('signal_snapshots')
+          .select('*')
+          .order('created_at', { ascending: false })
+          .limit(20);
+        
+        if (error) throw error;
+        
+        const watchEl = document.querySelector('.watchlist');
+        if (!watchEl) return;
+        
+        // Group by ticker, keep only latest
+        const byTicker = {};
+        data?.forEach(snap => {
+          if (!byTicker[snap.ticker]) {
+            byTicker[snap.ticker] = snap;
+          }
+        });
+        
+        watchEl.innerHTML = '';
+        Object.values(byTicker).slice(0, 4).forEach(snap => {
+          const isReady = snap.setup_state === 'ready';
+          const el = document.createElement('div');
+          el.className = 'watch-item';
+          el.innerHTML = `
+            <span class="dot ${isReady ? 'good' : ''}"></span>
+            <div>
+              <strong>${snap.ticker}</strong>
+              <div class="label">${snap.setup_family} - Score: ${snap.score.toFixed(2)}</div>
+            </div>
+            <span class="pill ${isReady ? 'good' : 'watch'}">${snap.setup_state.charAt(0).toUpperCase() + snap.setup_state.slice(1)}</span>
+          `;
+          watchEl.appendChild(el);
+        });
+      } catch (err) {
+        console.error('Error loading signals:', err);
+      }
+    }
+
+    // Update stats
+    async function loadStats() {
+      try {
+        const { count: alertCount } = await supabase
+          .from('alerts')
+          .select('*', { count: 'exact' });
+        
+        const { data: signals } = await supabase
+          .from('signal_snapshots')
+          .select('*')
+          .eq('setup_state', 'ready');
+        
+        const kpis = document.querySelectorAll('.grid.kpis .card');
+        if (kpis[2]) kpis[2].querySelector('.metric').textContent = alertCount || 0;
+        if (kpis[0]) kpis[0].querySelector('.metric').textContent = (signals?.length || 0);
+      } catch (err) {
+        console.error('Error loading stats:', err);
+      }
+    }
+
+    // Initial load
+    await loadAlerts();
+    await loadSignals();
+    await loadStats();
+
+    // Refresh every 5 seconds
+    setInterval(async () => {
+      await loadAlerts();
+      await loadSignals();
+      await loadStats();
+    }, 5000);
+
+    // Chart
+    const ctx = document.getElementById('priceChart');
+    new Chart(ctx, {
+      type: 'line',
+      data: {
+        labels: ['9:30','9:40','9:50','10:00','10:10','10:20','10:30','10:40','10:50'],
+        datasets: [
+          { label: 'Price', data: [485.9,486.2,486.0,486.4,486.1,486.5,486.7,486.55,486.9], borderColor: '#01696f', tension: 0.32, borderWidth: 2.5, pointRadius: 0 },
+          { label: 'VWAP', data: [485.95,486.0,486.04,486.08,486.12,486.18,486.22,486.26,486.31], borderColor: '#006494', tension: 0.32, borderDash:[6,6], pointRadius: 0 },
+          { label: '20 EMA', data: [485.88,485.94,485.99,486.03,486.05,486.1,486.16,486.21,486.26], borderColor: '#964219', tension: 0.32, borderDash:[4,4], pointRadius: 0 }
+        ]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: { legend: { labels: { color: getComputedStyle(document.documentElement).getPropertyValue('--color-text') } } },
+        scales: {
+          x: { ticks: { color: getComputedStyle(document.documentElement).getPropertyValue('--color-text-muted') }, grid: { color: 'rgba(128,128,128,.12)' } },
+          y: { ticks: { color: getComputedStyle(document.documentElement).getPropertyValue('--color-text-muted') }, grid: { color: 'rgba(128,128,128,.12)' } }
+        }
+      }
+    });
+  </script>
+</body>
+</html>

@@ -1,0 +1,25 @@
+{
+  "massive": {
+    "api_key": "gfwW29OhfkSrKrgm6tIYzzrjiC5Vkw9w",
+    "access_key_id": "8326bc83-fd6e-497b-86d3-b028a036aca6",
+    "secret_access_key": "gfwW29OhfkSrKrgm6tIYzzrjiC5Vkw9w",
+    "s3_endpoint": "https://files.massive.com",
+    "s3_bucket": "flatfiles",
+    "api_url": "https://api.massive.com",
+    "stocks_ws_url": "wss://stream.massive.com/stocks",
+    "options_ws_url": "wss://stream.massive.com/options",
+    "symbols": ["SPY", "QQQ", "IWM", "AAPL", "AMZN", "META", "MSFT", "NVDA", "TSLA", "GOOGL"]
+  },
+  "supabase": {
+    "url": "https://golqsjxpivryqwyaxwhl.supabase.co",
+    "service_role_key": "sb_secret_rPMbkeuyJWZDSONhiqhqSA_bbfGX3QQ"
+  },
+  "telegram": {
+    "bot_token": "8446378241:AAGPg5GNa7gi8YCMktVV99DhScY6DdP-7Bg",
+    "chat_id": "8073987618"
+  },
+  "system": {
+    "poll_interval_seconds": 5,
+    "environment": "live"
+  }
+}

@@ -1,0 +1,71 @@
+═══════════════════════════════════════════════════════════════════════════════
+  MONEY PENNY PHASE 2 — QUICK START CARD
+═══════════════════════════════════════════════════════════════════════════════
+
+📍 LOCATION
+  /Users/clawd/.openclaw/workspace/money-penny/
+
+🗄️  DATABASE SETUP (RUN ONCE)
+  1. Open: https://app.supabase.com/project/golqsjxpivryqwyaxwhl/sql/new
+  2. Copy schema_v2.sql from backend/ folder
+  3. Paste and run in SQL editor
+  4. Done ✓
+
+🚀 START WORKER
+  cd /Users/clawd/.openclaw/workspace/money-penny/backend
+  source .venv/bin/activate
+  python worker_v2.py
+
+🛑 STOP WORKER
+  Ctrl+C in terminal (graceful shutdown)
+
+📊 MONITOR SYSTEM
+  • Telegram: Alerts arrive in real-time
+  • Dashboard: https://money-penny-suryaobb.vercel.app (live view)
+  • Supabase: alerts table shows all signals
+
+🎯 WHAT IT DOES
+  Monitors: SPY, QQQ, IWM, AAPL, AMZN, META, MSFT, NVDA, TSLA, GOOGL
+  Real Signals: SPY, QQQ only (others logged but not alerted)
+  
+  Detects:
+  • VWAP crossing above EMA20 with volume confirmation
+  • Price pullback below VWAP then reclaiming above
+  
+  Alerts:
+  • 🟡 WATCH - Setup detected, not ready
+  • 🟢 READY - Setup ready for entry
+  • ⛔ INVALIDATED - Setup failed
+
+📝 LOGS
+  All signals logged to terminal with reason why fired/rejected
+  Example: "READY: VWAP/EMA crossover (V=641.25 > E=640.50) + volume confirmed"
+
+⚙️  CONFIG
+  Settings in: backend/config.json
+  • Massive API key: gfwW29OhfkSrKrgm6tIYzzrjiC5Vkw9w
+  • Telegram bot: 8446378241:AAGPg5GNa7gi8YCMktVV99DhScY6DdP-7Bg
+  • Chat ID: 8073987618
+  • Poll interval: 5 seconds
+
+🔧 ENABLE MORE SYMBOLS
+  Edit worker_v2.py line ~50:
+  ENABLED_SYMBOLS = ['SPY', 'QQQ', 'AAPL']  # Add tickers here
+
+📈 FILE STRUCTURE
+  backend/
+    ├── worker_v2.py .............. Main worker (start this)
+    ├── signal_engine.py .......... VWAP+EMA logic
+    ├── massive_client.py ......... Fetch live data
+    ├── telegram_client.py ........ Send alerts
+    ├── config.json ............... Credentials
+    ├── schema_v2.sql ............. Database schema
+    └── .venv/ .................... Python environment
+
+🐛 DEBUGGING
+  Check logs in worker output
+  View alerts: https://app.supabase.com/project/golqsjxpivryqwyaxwhl/editor/5
+  View candles: SELECT * FROM candles ORDER BY time_utc DESC LIMIT 10;
+  System health: SELECT * FROM system_state;
+
+═══════════════════════════════════════════════════════════════════════════════
