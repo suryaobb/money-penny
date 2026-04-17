@@ -428,8 +428,10 @@ document.getElementById('chart-sym-sel').addEventListener('change', e => {
 });
 
 async function updateChart() {
-  const data = await db('alerts', `?select=context,created_at&ticker=eq.${chartSym}&order=created_at.asc&limit=40`);
-  const pts = (data||[]).filter(d => d.context?.entry_price);
+  // Read from PRICE snapshots — available for all 10 symbols every 5s
+  const data = await db('signal_snapshots',
+    `?select=payload,created_at&ticker=eq.${chartSym}&setup_family=eq.PRICE&order=created_at.asc&limit=60`);
+  const pts = (data||[]).filter(d => d.payload?.price);
   const emEl = document.getElementById('chart-empty');
 
   if (!pts.length) {
@@ -441,9 +443,9 @@ async function updateChart() {
   emEl.style.display = 'none';
 
   mainChart.data.labels = pts.map(d => new Date(d.created_at).toLocaleTimeString([], {hour:'2-digit',minute:'2-digit',second:'2-digit'}));
-  mainChart.data.datasets[0].data = pts.map(d => d.context.entry_price || null);
-  mainChart.data.datasets[1].data = pts.map(d => d.context.vwap_at_entry || null);
-  mainChart.data.datasets[2].data = pts.map(d => d.context.ema20_at_entry || null);
+  mainChart.data.datasets[0].data = pts.map(d => d.payload.price || null);
+  mainChart.data.datasets[1].data = pts.map(d => d.payload.vwap  || null);
+  mainChart.data.datasets[2].data = pts.map(d => d.payload.ema20 || null);
 
   // Build horizontal lines from session levels
   const lvl = levels[chartSym];
