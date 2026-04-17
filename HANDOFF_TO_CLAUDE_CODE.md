@@ -166,7 +166,7 @@ const SUPABASE_ANON_KEY = 'sb_publishable_vXYHSU2AeV4ppOHo1vIozw_qtXJAcia';
   },
   "supabase": {
     "url": "https://golqsjxpivryqwyaxwhl.supabase.co",
-    "service_role_key": "sb_secret_rPMbkeuyJWZDSONhiqhqSA_bbfGX3QQ",
+    "service_role_key": "sb_secret_REDACTED",
     "anon_key": "sb_publishable_vXYHSU2AeV4ppOHo1vIozw_qtXJAcia"
   },
   "telegram": {

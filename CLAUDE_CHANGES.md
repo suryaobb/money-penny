@@ -97,7 +97,7 @@ Or open `app/money-penny-control-center.html` directly in a browser — it works
 
 ## Notes for Zara
 
-- The service role key is used for the dashboard connection. `config.json` (which contains this key) was already committed to the public GitHub repo before this change — no additional security exposure was introduced.
+- The dashboard uses the **anon/publishable key** (safe for browsers). The direct REST API approach bypasses the old SDK version issue that caused the original 401 errors.
 - The `system_state` table is written by the worker every 5 seconds. The dashboard reads it to show worker health.
 - The price chart populates as SPY alerts accumulate — it shows the last 20 SPY data points.
 - The heatmap section remains static (no options flow data in Supabase yet).
