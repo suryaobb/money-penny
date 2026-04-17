@@ -1,474 +1,623 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Money Penny Control Center</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Money Penny</title>
   <link href="https://api.fontshare.com/v2/css?f[]=satoshi@400,500,700&f[]=general-sans@500,600,700&display=swap" rel="stylesheet">
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <style>
-    :root, [data-theme="light"] {
-      --font-body: 'Satoshi', Inter, sans-serif;
-      --font-display: 'General Sans', Inter, sans-serif;
-      --text-xs: clamp(0.75rem, 0.7rem + 0.25vw, 0.875rem);
-      --text-sm: clamp(0.875rem, 0.8rem + 0.35vw, 1rem);
-      --text-base: clamp(1rem, 0.95rem + 0.25vw, 1.125rem);
-      --text-lg: clamp(1.125rem, 1rem + 0.75vw, 1.5rem);
-      --text-xl: clamp(1.5rem, 1.2rem + 1.25vw, 2rem);
-      --space-1: .25rem; --space-2: .5rem; --space-3: .75rem; --space-4: 1rem; --space-5: 1.25rem; --space-6: 1.5rem; --space-8: 2rem; --space-10: 2.5rem;
-      --color-bg: #f7f6f2; --color-surface:#f9f8f5; --color-surface-2:#fbfbf9; --color-surface-offset:#f3f0ec; --color-divider:#dcd9d5; --color-border:#d4d1ca;
-      --color-text:#28251d; --color-text-muted:#66645f; --color-text-faint:#9b9993; --color-text-inverse:#f9f8f4;
-      --color-primary:#01696f; --color-primary-hover:#0c4e54; --color-primary-highlight:#cedcd8;
-      --color-success:#437a22; --color-warning:#964219; --color-error:#a12c7b; --color-blue:#006494;
-      --radius-sm:.375rem; --radius-md:.5rem; --radius-lg:.75rem; --radius-xl:1rem; --radius-full:9999px;
-      --shadow-sm:0 1px 2px rgba(0,0,0,.06); --shadow-md:0 6px 18px rgba(0,0,0,.08); --shadow-lg:0 12px 36px rgba(0,0,0,.12);
+    :root {
+      --bg:#0c0c0e; --surface:#111114; --surface2:#17171b; --surface3:#1d1d22;
+      --border:#26262e; --divider:#1e1e24;
+      --text:#eeedf0; --muted:#888896; --faint:#44444f;
+      --green:#22c55e; --green-bg:rgba(34,197,94,.1);
+      --amber:#f59e0b; --amber-bg:rgba(245,158,11,.1);
+      --red:#ef4444;   --red-bg:rgba(239,68,68,.1);
+      --blue:#3b82f6;  --blue-bg:rgba(59,130,246,.1);
+      --teal:#14b8a6;
+      --font:'Satoshi',system-ui,sans-serif;
+      --mono:ui-monospace,'SF Mono',Menlo,monospace;
     }
-    [data-theme="dark"] {
-      --color-bg:#171614; --color-surface:#1c1b19; --color-surface-2:#201f1d; --color-surface-offset:#242320; --color-divider:#2c2a27; --color-border:#3a3835;
-      --color-text:#ece9e3; --color-text-muted:#a7a29a; --color-text-faint:#706d67; --color-text-inverse:#171614;
-      --color-primary:#4f98a3; --color-primary-hover:#70aeb8; --color-primary-highlight:#2f3b3d;
-      --color-success:#7fb25d; --color-warning:#d88e5e; --color-error:#db7ab5; --color-blue:#74add7;
-      --shadow-sm:0 1px 2px rgba(0,0,0,.2); --shadow-md:0 6px 18px rgba(0,0,0,.28); --shadow-lg:0 12px 36px rgba(0,0,0,.4);
-    }
-    * { box-sizing: border-box; margin:0; padding:0; }
-    body { font-family: var(--font-body); background: var(--color-bg); color: var(--color-text); min-height:100vh; }
-    button, input, select { font: inherit; color: inherit; }
-    .app { display:grid; grid-template-columns: 270px 1fr; min-height:100vh; }
-    .sidebar { background: var(--color-surface); border-right:1px solid var(--color-border); padding: var(--space-6); display:flex; flex-direction:column; gap: var(--space-6); }
-    .brand { display:flex; align-items:center; gap: var(--space-3); font-family: var(--font-display); font-size: var(--text-lg); font-weight:700; }
-    .brand-mark { width:36px; height:36px; border-radius:12px; background: linear-gradient(135deg, var(--color-primary-highlight), var(--color-surface-offset)); display:grid; place-items:center; border:1px solid var(--color-border); }
-    .brand-mark svg { width:20px; height:20px; }
-    .nav { display:grid; gap: var(--space-2); }
-    .nav button { text-align:left; padding: .875rem 1rem; border-radius: 12px; border:1px solid transparent; background: transparent; }
-    .nav button.active { background: var(--color-surface-offset); border-color: var(--color-border); }
-    .sidebar-card { background: var(--color-surface-2); border:1px solid var(--color-border); border-radius: var(--radius-xl); padding: var(--space-4); box-shadow: var(--shadow-sm); }
-    .main { display:flex; flex-direction:column; min-width:0; }
-    .topbar { position:sticky; top:0; z-index:5; backdrop-filter: blur(18px); background: color-mix(in srgb, var(--color-bg) 84%, transparent); border-bottom:1px solid var(--color-divider); padding: var(--space-4) var(--space-6); display:flex; justify-content:space-between; align-items:center; gap: var(--space-4); }
-    .topbar h1 { font-family: var(--font-display); font-size: var(--text-xl); }
-    .top-actions { display:flex; gap: var(--space-3); align-items:center; }
-    .btn { border:1px solid var(--color-border); background: var(--color-surface); padding: .8rem 1rem; border-radius: 12px; cursor:pointer; }
-    .btn.primary { background: var(--color-primary); color: var(--color-text-inverse); border-color: var(--color-primary); }
-    .workspace { padding: var(--space-6); display:grid; gap: var(--space-6); }
-    .grid { display:grid; gap: var(--space-6); }
-    .grid.kpis { grid-template-columns: repeat(4, minmax(0,1fr)); }
-    .grid.main-panels { grid-template-columns: 1.8fr 1fr; align-items:start; }
-    .card { background: var(--color-surface); border:1px solid var(--color-border); border-radius: 18px; box-shadow: var(--shadow-sm); overflow:hidden; }
-    .card-head { padding: var(--space-4) var(--space-4) 0; display:flex; justify-content:space-between; align-items:flex-start; gap:var(--space-4); }
-    .card-body { padding: var(--space-4); }
-    .eyebrow { color: var(--color-text-muted); font-size: var(--text-xs); text-transform: uppercase; letter-spacing: .08em; }
-    .metric { font-family: var(--font-display); font-size: 2rem; line-height:1; margin-top:.4rem; }
-    .sub { color: var(--color-text-muted); font-size: var(--text-sm); margin-top:.35rem; }
-    .pill { display:inline-flex; align-items:center; gap:.4rem; padding:.35rem .7rem; border-radius:999px; font-size: var(--text-xs); border:1px solid var(--color-border); }
-    .pill.good { background: color-mix(in srgb, var(--color-success) 10%, var(--color-surface)); color: var(--color-success); }
-    .pill.watch { background: color-mix(in srgb, var(--color-warning) 10%, var(--color-surface)); color: var(--color-warning); }
-    .rows { display:grid; gap: .85rem; }
-    .row { display:flex; justify-content:space-between; gap:1rem; align-items:center; padding:.8rem 0; border-bottom:1px solid var(--color-divider); }
-    .row:last-child { border-bottom:none; padding-bottom:0; }
-    .label { color: var(--color-text-muted); font-size: var(--text-sm); }
-    .value { font-weight:600; }
-    .watchlist { display:grid; gap: .75rem; }
-    .watch-item { display:grid; grid-template-columns: auto 1fr auto; gap: .8rem; align-items:center; padding:.9rem 1rem; border-radius: 14px; background: var(--color-surface-2); border:1px solid var(--color-border); }
-    .dot { width:10px; height:10px; border-radius:999px; background: var(--color-warning); }
-    .dot.good { background: var(--color-success); }
-    .heatmap { display:grid; grid-template-columns: repeat(5, 1fr); gap: .65rem; }
-    .heat { aspect-ratio: 1.1 / 1; border-radius: 14px; padding:.8rem; color:white; display:flex; flex-direction:column; justify-content:space-between; font-size: var(--text-xs); }
-    .h1{background:#0c4e54}.h2{background:#1d6a45}.h3{background:#996d10}.h4{background:#8a4e18}.h5{background:#7a2f56}
-    .alert-feed { display:grid; gap: .9rem; }
-    .alert { padding: 1rem; border-radius: 14px; background: var(--color-surface-2); border:1px solid var(--color-border); }
-    .alert.ready { border-left: 3px solid var(--color-success); }
-    .alert.watch { border-left: 3px solid var(--color-warning); }
-    .split { display:grid; grid-template-columns: 1fr 1fr; gap: var(--space-6); }
-    .status-dot { display:inline-block; width:8px; height:8px; border-radius:50%; background:var(--color-success); margin-right:.4rem; animation: pulse 2s infinite; }
-    .status-dot.offline { background:var(--color-error); animation:none; }
-    .status-dot.warn { background:var(--color-warning); }
-    @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.4} }
-    .conn-banner { display:flex; align-items:center; gap:.5rem; font-size:var(--text-xs); padding:.35rem .7rem; border-radius:999px; border:1px solid var(--color-border); background:var(--color-surface-2); }
-    .last-update { font-size:var(--text-xs); color:var(--color-text-faint); }
-    canvas { width:100% !important; height:300px !important; }
-    @media (max-width: 1080px) {
-      .app { grid-template-columns: 1fr; }
-      .sidebar { border-right:none; border-bottom:1px solid var(--color-border); }
-      .grid.kpis, .grid.main-panels, .split { grid-template-columns: 1fr; }
-    }
+    *{box-sizing:border-box;margin:0;padding:0;}
+    body{font-family:var(--font);background:var(--bg);color:var(--text);font-size:14px;min-height:100vh;overflow-x:hidden;}
+    button{cursor:pointer;font:inherit;color:inherit;background:none;border:none;}
+
+    /* ── Shell ────────────────────────────────────────── */
+    .shell{display:grid;grid-template-columns:220px 1fr;min-height:100vh;}
+
+    /* ── Sidebar ──────────────────────────────────────── */
+    .sidebar{background:var(--surface);border-right:1px solid var(--border);display:flex;flex-direction:column;padding:20px 12px;gap:4px;position:sticky;top:0;height:100vh;overflow-y:auto;}
+    .sidebar-brand{display:flex;align-items:center;gap:10px;padding:4px 8px 20px;border-bottom:1px solid var(--divider);margin-bottom:8px;}
+    .brand-dot{width:28px;height:28px;border-radius:8px;background:linear-gradient(135deg,var(--teal),var(--blue));display:grid;place-items:center;flex-shrink:0;}
+    .brand-dot svg{width:14px;height:14px;stroke:#fff;fill:none;stroke-width:2;}
+    .brand-name{font-family:'General Sans',sans-serif;font-weight:700;font-size:15px;}
+    .brand-sub{font-size:10px;color:var(--faint);margin-top:1px;}
+    .nav-label{font-size:10px;text-transform:uppercase;letter-spacing:.08em;color:var(--faint);padding:8px 10px 4px;margin-top:8px;}
+    .nav-btn{display:flex;align-items:center;gap:10px;padding:9px 10px;border-radius:10px;font-size:13px;color:var(--muted);transition:all .15s;width:100%;}
+    .nav-btn svg{width:16px;height:16px;flex-shrink:0;opacity:.7;}
+    .nav-btn:hover{background:var(--surface2);color:var(--text);}
+    .nav-btn.active{background:var(--surface3);color:var(--text);}
+    .nav-btn.active svg{opacity:1;}
+    .sidebar-footer{margin-top:auto;padding-top:16px;border-top:1px solid var(--divider);}
+    .conn-pill{display:flex;align-items:center;gap:6px;padding:8px 10px;border-radius:10px;background:var(--surface2);font-size:12px;color:var(--muted);}
+    .conn-dot{width:7px;height:7px;border-radius:50%;background:var(--green);animation:blink 2s infinite;flex-shrink:0;}
+    .conn-dot.dead{background:var(--red);animation:none;}
+    @keyframes blink{0%,100%{opacity:1}50%{opacity:.35}}
+    .last-up{font-size:10px;color:var(--faint);padding:4px 10px 0;}
+
+    /* ── Main ─────────────────────────────────────────── */
+    .main{display:flex;flex-direction:column;min-width:0;}
+    .topbar{background:var(--surface);border-bottom:1px solid var(--border);padding:0 24px;height:52px;display:flex;align-items:center;justify-content:space-between;gap:16px;position:sticky;top:0;z-index:10;}
+    .page-title{font-family:'General Sans',sans-serif;font-weight:700;font-size:16px;}
+    .topbar-meta{font-size:12px;color:var(--faint);}
+
+    /* ── Views ────────────────────────────────────────── */
+    .view{display:none;padding:24px;gap:20px;flex-direction:column;}
+    .view.active{display:flex;}
+
+    /* ── Ticker strip ─────────────────────────────────── */
+    .ticker-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:10px;}
+    .t-card{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:14px;cursor:pointer;transition:border-color .15s;}
+    .t-card:hover{border-color:var(--muted);}
+    .t-card.sig-ready{border-color:var(--green);background:var(--green-bg);}
+    .t-card.sig-watch{border-color:var(--amber);background:var(--amber-bg);}
+    .t-sym{font-family:'General Sans',sans-serif;font-weight:700;font-size:13px;color:var(--muted);}
+    .t-price{font-family:var(--mono);font-size:22px;font-weight:700;margin-top:4px;}
+    .t-price.up{color:var(--green);}
+    .t-price.dn{color:var(--red);}
+    .t-price.fl{color:var(--text);}
+    .t-rows{margin-top:8px;display:grid;gap:3px;}
+    .t-row{display:flex;justify-content:space-between;font-size:11px;}
+    .t-row span:first-child{color:var(--faint);}
+    .t-row span:last-child{font-family:var(--mono);color:var(--muted);}
+    .t-age{font-size:10px;color:var(--faint);margin-top:6px;}
+    .t-badge{display:inline-flex;align-items:center;gap:3px;font-size:10px;font-weight:600;padding:2px 7px;border-radius:20px;margin-top:6px;}
+    .t-badge.ready{background:var(--green-bg);color:var(--green);}
+    .t-badge.watch{background:var(--amber-bg);color:var(--amber);}
+    .t-badge.none{background:var(--surface2);color:var(--faint);}
+
+    /* ── KPI bar ──────────────────────────────────────── */
+    .kpi-bar{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;}
+    .kpi{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:16px;}
+    .kpi-lbl{font-size:11px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);}
+    .kpi-val{font-family:'General Sans',sans-serif;font-size:26px;font-weight:700;line-height:1;margin-top:6px;}
+    .kpi-sub{font-size:11px;color:var(--faint);margin-top:4px;}
+
+    /* ── Two-column panel row ─────────────────────────── */
+    .col2{display:grid;grid-template-columns:1.6fr 1fr;gap:20px;align-items:start;}
+    .panel{background:var(--surface);border:1px solid var(--border);border-radius:14px;overflow:hidden;}
+    .ph{padding:14px 18px 0;display:flex;justify-content:space-between;align-items:center;gap:12px;}
+    .ph-title{font-family:'General Sans',sans-serif;font-weight:700;font-size:14px;}
+    .ph-eye{font-size:10px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);margin-bottom:3px;}
+    .pb{padding:14px 18px;}
+    canvas{width:100%!important;height:240px!important;}
+
+    /* ── Alert feed ───────────────────────────────────── */
+    .alert-scroll{max-height:380px;overflow-y:auto;display:grid;gap:8px;}
+    .alert-scroll::-webkit-scrollbar{width:3px;}
+    .alert-scroll::-webkit-scrollbar-thumb{background:var(--border);border-radius:3px;}
+    .a-item{background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:10px 12px;}
+    .a-item.ready{border-left:3px solid var(--green);}
+    .a-item.watch{border-left:3px solid var(--amber);}
+    .a-top{display:flex;justify-content:space-between;gap:8px;align-items:flex-start;}
+    .a-head{font-weight:600;font-size:13px;}
+    .a-time{font-size:10px;font-family:var(--mono);color:var(--faint);white-space:nowrap;padding-top:2px;}
+    .a-msg{font-size:12px;color:var(--muted);margin-top:4px;line-height:1.5;}
+    .a-chips{display:flex;gap:6px;margin-top:6px;flex-wrap:wrap;}
+    .chip{font-size:11px;font-family:var(--mono);background:var(--surface);border:1px solid var(--border);border-radius:6px;padding:2px 7px;color:var(--muted);}
+
+    /* ── Status rows ──────────────────────────────────── */
+    .s-list{display:grid;gap:0;}
+    .s-row{display:flex;justify-content:space-between;align-items:center;padding:9px 0;border-bottom:1px solid var(--divider);font-size:13px;}
+    .s-row:last-child{border-bottom:none;}
+    .s-lbl{color:var(--muted);}
+    .ok{color:var(--green);}
+    .warn{color:var(--amber);}
+    .err{color:var(--red);}
+
+    /* ── Signals view ─────────────────────────────────── */
+    .sig-table{width:100%;border-collapse:collapse;}
+    .sig-table th{text-align:left;padding:8px 12px;font-size:11px;text-transform:uppercase;letter-spacing:.06em;color:var(--faint);border-bottom:1px solid var(--border);}
+    .sig-table td{padding:10px 12px;border-bottom:1px solid var(--divider);font-size:13px;vertical-align:middle;}
+    .sig-table tr:last-child td{border-bottom:none;}
+    .sig-table tr:hover td{background:var(--surface2);}
+
+    /* ── Alerts full view ─────────────────────────────── */
+    .alerts-full{display:grid;gap:10px;}
+
+    /* ── Empty ────────────────────────────────────────── */
+    .empty{color:var(--faint);font-size:13px;padding:20px;text-align:center;}
+
+    /* ── Chart sym select ─────────────────────────────── */
+    select.sym-sel{background:var(--surface2);border:1px solid var(--border);color:var(--text);border-radius:8px;padding:4px 8px;font-size:12px;cursor:pointer;font-family:var(--font);}
+
+    @media(max-width:1100px){.col2,.kpi-bar{grid-template-columns:1fr;}.shell{grid-template-columns:1fr;}.sidebar{height:auto;position:relative;flex-direction:row;flex-wrap:wrap;padding:12px;gap:4px;}.sidebar-brand{border-bottom:none;padding-bottom:0;margin-bottom:0;}.sidebar-footer{display:none;}.nav-label{display:none;}}
+    @media(max-width:640px){.ticker-grid{grid-template-columns:repeat(2,1fr);}.view{padding:12px;}}
   </style>
 </head>
 <body>
-  <div class="app">
-    <aside class="sidebar">
-      <div class="brand">
-        <div class="brand-mark" aria-hidden="true">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M5 18L12 5l7 13"/><path d="M8.5 12h7"/></svg>
+<div class="shell">
+
+  <!-- ── Sidebar ──────────────────────────────────────── -->
+  <aside class="sidebar">
+    <div class="sidebar-brand">
+      <div class="brand-dot">
+        <svg viewBox="0 0 24 24"><path d="M5 18L12 5l7 13"/><path d="M8.5 12h7"/></svg>
+      </div>
+      <div>
+        <div class="brand-name">Money Penny</div>
+        <div class="brand-sub">Trading signals</div>
+      </div>
+    </div>
+
+    <div class="nav-label">Navigation</div>
+    <button class="nav-btn active" data-view="overview">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+      Overview
+    </button>
+    <button class="nav-btn" data-view="signals">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+      Signals
+    </button>
+    <button class="nav-btn" data-view="alerts">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+      Alerts
+    </button>
+    <button class="nav-btn" data-view="system">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="3"/><path d="M19.07 4.93l-1.41 1.41M4.93 4.93l1.41 1.41M12 2v2M12 20v2M20 12h2M2 12h2M19.07 19.07l-1.41-1.41M4.93 19.07l1.41-1.41"/></svg>
+      System
+    </button>
+
+    <div class="sidebar-footer">
+      <div class="conn-pill">
+        <span class="conn-dot" id="conn-dot"></span>
+        <span id="conn-label">Connecting…</span>
+      </div>
+      <div class="last-up" id="last-up"></div>
+    </div>
+  </aside>
+
+  <!-- ── Main ─────────────────────────────────────────── -->
+  <div class="main">
+    <header class="topbar">
+      <div>
+        <div class="page-title" id="page-title">Overview</div>
+      </div>
+      <div style="display:flex;align-items:center;gap:16px;">
+        <span class="topbar-meta" id="topbar-meta">Loading…</span>
+        <span style="font-size:12px;color:var(--faint);" id="last-refresh"></span>
+      </div>
+    </header>
+
+    <!-- ────────────────────────── OVERVIEW ────────────────────────────── -->
+    <div class="view active" id="view-overview">
+
+      <!-- Price strip -->
+      <div>
+        <div style="font-size:11px;text-transform:uppercase;letter-spacing:.06em;color:var(--faint);margin-bottom:10px;">Live prices — last seen from backend</div>
+        <div class="ticker-grid" id="ticker-strip"></div>
+      </div>
+
+      <!-- KPI bar -->
+      <div class="kpi-bar">
+        <div class="kpi"><div class="kpi-lbl">Ready signals</div><div class="kpi-val" id="kpi-ready">—</div><div class="kpi-sub" id="kpi-ready-sub">loading</div></div>
+        <div class="kpi"><div class="kpi-lbl">Alerts today</div><div class="kpi-val" id="kpi-alerts">—</div><div class="kpi-sub" id="kpi-alerts-sub">loading</div></div>
+        <div class="kpi"><div class="kpi-lbl">Worker</div><div class="kpi-val" style="font-size:18px;" id="kpi-worker">—</div><div class="kpi-sub" id="kpi-worker-sub">loading</div></div>
+        <div class="kpi"><div class="kpi-lbl">Last poll</div><div class="kpi-val" style="font-size:16px;" id="kpi-poll">—</div><div class="kpi-sub">from system_state</div></div>
+      </div>
+
+      <!-- Chart + feed -->
+      <div class="col2">
+        <div class="panel">
+          <div class="ph">
+            <div><div class="ph-eye">Price chart</div><div class="ph-title" id="chart-title">SPY — Price · VWAP · EMA20</div></div>
+            <select class="sym-sel" id="chart-sym-sel">
+              <option value="SPY">SPY</option><option value="QQQ">QQQ</option><option value="IWM">IWM</option>
+              <option value="AAPL">AAPL</option><option value="NVDA">NVDA</option><option value="TSLA">TSLA</option>
+              <option value="AMZN">AMZN</option><option value="META">META</option><option value="MSFT">MSFT</option><option value="GOOGL">GOOGL</option>
+            </select>
+          </div>
+          <div class="pb">
+            <canvas id="priceChart"></canvas>
+            <div class="empty" id="chart-empty" style="display:none;">No data yet for this symbol. Populates as alerts come in.</div>
+          </div>
         </div>
-        <div>
-          <div>Money Penny</div>
-          <div class="eyebrow">Control center</div>
+        <div class="panel">
+          <div class="ph"><div><div class="ph-eye">Alert feed</div><div class="ph-title">Latest signals</div></div></div>
+          <div class="pb"><div class="alert-scroll" id="alert-feed-overview"><div class="empty">Loading…</div></div></div>
         </div>
       </div>
-      <nav class="nav">
-        <button class="active">Overview</button>
-        <button>Signals</button>
-        <button>Heatmaps</button>
-        <button>Levels</button>
-        <button>Alerts</button>
-        <button>System</button>
-      </nav>
-      <div class="sidebar-card">
-        <div class="eyebrow">Fast launch stack</div>
-        <div class="rows" style="margin-top:1rem;">
-          <div class="row"><span class="label">Frontend</span><span class="value">Static HTML</span></div>
-          <div class="row"><span class="label">Backend</span><span class="value">Python worker</span></div>
-          <div class="row"><span class="label">Database</span><span class="value">Supabase</span></div>
-          <div class="row"><span class="label">Alerts</span><span class="value">Telegram</span></div>
+
+    </div><!-- /overview -->
+
+    <!-- ────────────────────────── SIGNALS ─────────────────────────────── -->
+    <div class="view" id="view-signals">
+      <div class="panel">
+        <div class="ph"><div><div class="ph-eye">Signal snapshots</div><div class="ph-title">All symbols — latest state</div></div></div>
+        <div class="pb">
+          <table class="sig-table" id="sig-table">
+            <thead><tr>
+              <th>Symbol</th><th>State</th><th>Setup</th><th>Score</th><th>Last seen</th>
+            </tr></thead>
+            <tbody id="sig-tbody"><tr><td colspan="5" class="empty">Loading…</td></tr></tbody>
+          </table>
         </div>
       </div>
-      <div class="sidebar-card">
-        <div class="eyebrow">Your focus</div>
-        <p class="sub" style="margin-top:.8rem;">SPY, QQQ, IWM plus Mag 7, with alerts for watch-worthy 0DTE and momentum setups.</p>
+      <div class="col2">
+        <div class="panel">
+          <div class="ph"><div><div class="ph-eye">Chart</div><div class="ph-title" id="sig-chart-title">SPY</div></div>
+            <select class="sym-sel" id="sig-chart-sym-sel">
+              <option value="SPY">SPY</option><option value="QQQ">QQQ</option><option value="IWM">IWM</option>
+              <option value="AAPL">AAPL</option><option value="NVDA">NVDA</option><option value="TSLA">TSLA</option>
+              <option value="AMZN">AMZN</option><option value="META">META</option><option value="MSFT">MSFT</option><option value="GOOGL">GOOGL</option>
+            </select>
+          </div>
+          <div class="pb"><canvas id="sigChart"></canvas></div>
+        </div>
+        <div class="panel">
+          <div class="ph"><div><div class="ph-eye">Latest snapshot</div><div class="ph-title" id="sig-levels-title">SPY</div></div></div>
+          <div class="pb"><div class="s-list" id="sig-levels"></div></div>
+        </div>
       </div>
-      <div class="sidebar-card" style="margin-top:auto;">
-        <div class="eyebrow">Connection</div>
-        <div id="conn-status" style="margin-top:.6rem; font-size:var(--text-sm);">
-          <span class="status-dot" id="conn-dot"></span><span id="conn-label">Connecting…</span>
-        </div>
-        <div id="last-update" class="last-update" style="margin-top:.4rem;"></div>
+    </div><!-- /signals -->
+
+    <!-- ────────────────────────── ALERTS ──────────────────────────────── -->
+    <div class="view" id="view-alerts">
+      <div style="display:flex;justify-content:space-between;align-items:center;gap:12px;">
+        <div style="font-size:11px;text-transform:uppercase;letter-spacing:.06em;color:var(--faint);">All alerts — newest first</div>
+        <select class="sym-sel" id="alerts-sym-filter">
+          <option value="">All symbols</option>
+          <option value="SPY">SPY</option><option value="QQQ">QQQ</option><option value="IWM">IWM</option>
+          <option value="AAPL">AAPL</option><option value="NVDA">NVDA</option><option value="TSLA">TSLA</option>
+          <option value="AMZN">AMZN</option><option value="META">META</option><option value="MSFT">MSFT</option><option value="GOOGL">GOOGL</option>
+        </select>
       </div>
-    </aside>
-    <main class="main">
-      <header class="topbar">
-        <div>
-          <h1>Live trading dashboard</h1>
-          <div class="sub">SPY · QQQ · Mag 7 — refreshes every 5s</div>
-        </div>
-        <div class="top-actions">
-          <button class="btn" data-theme-toggle>Toggle theme</button>
-        </div>
-      </header>
-      <section class="workspace">
-        <div class="grid kpis">
-          <article class="card"><div class="card-body"><div class="eyebrow">Ready signals</div><div class="metric" id="kpi-ready">—</div><div class="sub" id="kpi-ready-sub">Loading…</div></div></article>
-          <article class="card"><div class="card-body"><div class="eyebrow">Active symbols</div><div class="metric">10</div><div class="sub">SPY, QQQ, IWM, Mag 7</div></div></article>
-          <article class="card"><div class="card-body"><div class="eyebrow">Alerts today</div><div class="metric" id="kpi-alerts">—</div><div class="sub" id="kpi-alerts-sub">Loading…</div></div></article>
-          <article class="card"><div class="card-body"><div class="eyebrow">Worker state</div><div class="metric" id="kpi-state">—</div><div class="sub" id="kpi-state-sub">Checking…</div></div></article>
-        </div>
+      <div class="alerts-full" id="alerts-full"><div class="empty">Loading…</div></div>
+    </div><!-- /alerts -->
 
-        <div class="grid main-panels">
-          <article class="card">
-            <div class="card-head">
-              <div>
-                <div class="eyebrow">Price map</div>
-                <h2 style="font-family:var(--font-display); font-size:1.3rem; margin-top:.35rem;" id="chart-title">SPY/QQQ intraday context</h2>
-              </div>
-              <span class="pill good" id="chart-pill">Loading…</span>
+    <!-- ────────────────────────── SYSTEM ──────────────────────────────── -->
+    <div class="view" id="view-system">
+      <div class="col2">
+        <div class="panel">
+          <div class="ph"><div><div class="ph-eye">Pipeline</div><div class="ph-title">System status</div></div></div>
+          <div class="pb">
+            <div class="s-list">
+              <div class="s-row"><span class="s-lbl">Supabase connection</span><span id="sys-db">—</span></div>
+              <div class="s-row"><span class="s-lbl">Backend worker</span><span id="sys-worker">—</span></div>
+              <div class="s-row"><span class="s-lbl">Last worker poll</span><span id="sys-poll">—</span></div>
+              <div class="s-row"><span class="s-lbl">Worker started at</span><span id="sys-started">—</span></div>
+              <div class="s-row"><span class="s-lbl">Dashboard refresh</span><span class="ok">✅ Every 5 seconds</span></div>
+              <div class="s-row"><span class="s-lbl">Telegram bot</span><span class="ok">✅ Active</span></div>
+              <div class="s-row"><span class="s-lbl">Massive API</span><span class="ok">✅ Connected</span></div>
             </div>
-            <div class="card-body"><canvas id="priceChart"></canvas></div>
-          </article>
-          <article class="card">
-            <div class="card-head">
-              <div>
-                <div class="eyebrow">Watch queue</div>
-                <h2 style="font-family:var(--font-display); font-size:1.3rem; margin-top:.35rem;">Priority symbols</h2>
-              </div>
-            </div>
-            <div class="card-body watchlist" id="watchlist">
-              <div class="sub">Loading signals…</div>
-            </div>
-          </article>
+          </div>
         </div>
-
-        <div class="split">
-          <article class="card">
-            <div class="card-head"><div><div class="eyebrow">Levels</div><h2 style="font-family:var(--font-display); font-size:1.3rem; margin-top:.35rem;">Latest SPY snapshot</h2></div></div>
-            <div class="card-body rows" id="levels-rows">
-              <div class="sub">Loading levels…</div>
+        <div class="panel">
+          <div class="ph"><div><div class="ph-eye">Stack</div><div class="ph-title">Architecture</div></div></div>
+          <div class="pb">
+            <div class="s-list">
+              <div class="s-row"><span class="s-lbl">Data source</span><span>Massive.com REST API</span></div>
+              <div class="s-row"><span class="s-lbl">Signal engine</span><span>Python — VWAP + EMA</span></div>
+              <div class="s-row"><span class="s-lbl">Database</span><span>Supabase PostgreSQL</span></div>
+              <div class="s-row"><span class="s-lbl">Notifications</span><span>Telegram bot</span></div>
+              <div class="s-row"><span class="s-lbl">Frontend</span><span>Static HTML / Vercel</span></div>
+              <div class="s-row"><span class="s-lbl">Poll interval</span><span>5 seconds</span></div>
             </div>
-          </article>
-          <article class="card">
-            <div class="card-head"><div><div class="eyebrow">Contracts</div><h2 style="font-family:var(--font-display); font-size:1.3rem; margin-top:.35rem;">0DTE heatmap</h2></div></div>
-            <div class="card-body heatmap">
-              <div class="heat h1"><span>SPY C</span><strong>Monitor</strong></div>
-              <div class="heat h2"><span>QQQ C</span><strong>Watch</strong></div>
-              <div class="heat h3"><span>IWM C</span><strong>Neutral</strong></div>
-              <div class="heat h4"><span>SPY P</span><strong>Fade</strong></div>
-              <div class="heat h5"><span>QQQ P</span><strong>Hedge</strong></div>
-            </div>
-          </article>
+          </div>
         </div>
+      </div>
+      <div class="panel">
+        <div class="ph"><div><div class="ph-eye">Tracked symbols</div><div class="ph-title">10 symbols monitored</div></div></div>
+        <div class="pb"><div class="ticker-grid" id="sys-ticker-strip"></div></div>
+      </div>
+    </div><!-- /system -->
 
-        <div class="split">
-          <article class="card">
-            <div class="card-head"><div><div class="eyebrow">Alert feed</div><h2 style="font-family:var(--font-display); font-size:1.3rem; margin-top:.35rem;">Live from Supabase</h2></div></div>
-            <div class="card-body alert-feed" id="alert-feed">
-              <div class="sub">Loading alerts…</div>
-            </div>
-          </article>
-          <article class="card">
-            <div class="card-head"><div><div class="eyebrow">System Status</div><h2 style="font-family:var(--font-display); font-size:1.3rem; margin-top:.35rem;">Pipeline health</h2></div></div>
-            <div class="card-body rows" id="system-rows">
-              <div class="row"><span class="label">Backend Worker</span><span class="value" id="sys-worker">Checking…</span></div>
-              <div class="row"><span class="label">Supabase</span><span class="value" id="sys-db">Connecting…</span></div>
-              <div class="row"><span class="label">Dashboard</span><span class="value">✅ Live (5s refresh)</span></div>
-              <div class="row"><span class="label">Telegram Alerts</span><span class="value">✅ Active</span></div>
-              <div class="row"><span class="label">Last poll</span><span class="value" id="sys-poll">—</span></div>
-            </div>
-          </article>
-        </div>
-      </section>
-    </main>
-  </div>
+  </div><!-- /main -->
+</div><!-- /shell -->
 
-  <script>
-    // ── Supabase config ──────────────────────────────────────────────────────
-    const SUPABASE_URL = 'https://golqsjxpivryqwyaxwhl.supabase.co';
-    const SUPABASE_KEY = 'sb_publishable_vXYHSU2AeV4ppOHo1vIozw_qtXJAcia';
+<script>
+  // ── Config ───────────────────────────────────────────────────────────────
+  const SUPABASE_URL = 'https://golqsjxpivryqwyaxwhl.supabase.co';
+  const SUPABASE_KEY = 'sb_publishable_vXYHSU2AeV4ppOHo1vIozw_qtXJAcia';
+  const SYMBOLS = ['SPY','QQQ','IWM','AAPL','AMZN','META','MSFT','NVDA','TSLA','GOOGL'];
 
-    async function dbFetch(table, params = '') {
-      const res = await fetch(`${SUPABASE_URL}/rest/v1/${table}${params}`, {
-        headers: {
-          'apikey': SUPABASE_KEY,
-          'Authorization': `Bearer ${SUPABASE_KEY}`,
-          'Content-Type': 'application/json',
-          'Prefer': 'return=representation',
-        }
-      });
-      if (!res.ok) {
-        const body = await res.text();
-        throw new Error(`DB ${res.status}: ${body}`);
+  async function db(table, params='') {
+    const r = await fetch(`${SUPABASE_URL}/rest/v1/${table}${params}`, {
+      headers:{'apikey':SUPABASE_KEY,'Authorization':'Bearer '+SUPABASE_KEY,'Content-Type':'application/json'}
+    });
+    if (!r.ok) throw new Error(`${r.status}: ${await r.text()}`);
+    return r.json();
+  }
+
+  // ── Navigation ────────────────────────────────────────────────────────────
+  const viewTitles = {overview:'Overview',signals:'Signals',alerts:'Alerts',system:'System'};
+  document.querySelectorAll('.nav-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const v = btn.dataset.view;
+      document.querySelectorAll('.nav-btn').forEach(b=>b.classList.toggle('active', b===btn));
+      document.querySelectorAll('.view').forEach(el=>el.classList.toggle('active', el.id===`view-${v}`));
+      document.getElementById('page-title').textContent = viewTitles[v];
+    });
+  });
+
+  // ── Price store ───────────────────────────────────────────────────────────
+  const store = {}; // { SYM: {price, vwap, ema20, score, state, ts} }
+
+  async function loadPrices() {
+    const data = await db('alerts','?select=ticker,context,created_at,priority&order=created_at.desc&limit=300');
+    (data||[]).forEach(row => {
+      const s = row.ticker;
+      if (!store[s] && row.context?.entry_price) {
+        store[s] = {
+          price: row.context.entry_price,
+          vwap:  row.context.vwap_at_entry,
+          ema20: row.context.ema20_at_entry,
+          score: row.context.setup_score,
+          state: row.context.setup_state || row.priority || '',
+          ts:    row.created_at,
+        };
       }
-      return res.json();
-    }
+    });
+    renderTickerStrip('ticker-strip');
+    renderTickerStrip('sys-ticker-strip');
+    renderSigLevels();
+  }
 
-    // ── Theme toggle ─────────────────────────────────────────────────────────
-    (function(){
-      const t = document.querySelector('[data-theme-toggle]');
-      const r = document.documentElement;
-      let d = matchMedia('(prefers-color-scheme:dark)').matches ? 'dark' : 'light';
-      r.setAttribute('data-theme', d);
-      t.addEventListener('click', () => {
-        d = d === 'dark' ? 'light' : 'dark';
-        r.setAttribute('data-theme', d);
-      });
-    })();
+  // ── Ticker strip renderer ─────────────────────────────────────────────────
+  function renderTickerStrip(elId) {
+    const el = document.getElementById(elId);
+    if (!el) return;
+    el.innerHTML = '';
+    SYMBOLS.forEach(sym => {
+      const d = store[sym];
+      const ready = d && /^ready$/i.test(d.state);
+      const watch = d && /^watch$/i.test(d.state);
+      const card = document.createElement('div');
+      card.className = `t-card${ready?' sig-ready':watch?' sig-watch':''}`;
+      if (d?.price) {
+        const up = d.vwap && d.price > d.vwap;
+        card.innerHTML = `
+          <div class="t-sym">${sym}</div>
+          <div class="t-price ${up?'up':'dn'}">$${(+d.price).toFixed(2)}</div>
+          <div class="t-rows">
+            <div class="t-row"><span>VWAP</span><span>${d.vwap?'$'+(+d.vwap).toFixed(2):'—'}</span></div>
+            <div class="t-row"><span>EMA20</span><span>${d.ema20?'$'+(+d.ema20).toFixed(2):'—'}</span></div>
+            <div class="t-row"><span>vs VWAP</span><span style="color:${up?'var(--green)':'var(--red)'}">${up?'▲ Above':'▼ Below'}</span></div>
+          </div>
+          <div class="t-age">Updated ${ago(d.ts)}</div>
+          <div class="t-badge ${ready?'ready':watch?'watch':'none'}">${d.state?d.state.toUpperCase():'—'}</div>
+        `;
+      } else {
+        card.innerHTML = `<div class="t-sym">${sym}</div><div class="t-price fl">—</div><div class="t-age" style="margin-top:8px;">No data yet</div>`;
+      }
+      el.appendChild(card);
+    });
+  }
 
-    // ── Chart setup ──────────────────────────────────────────────────────────
-    const chartCtx = document.getElementById('priceChart');
-    const priceChart = new Chart(chartCtx, {
-      type: 'line',
-      data: {
-        labels: [],
-        datasets: [
-          { label: 'Price', data: [], borderColor: '#01696f', tension: 0.32, borderWidth: 2.5, pointRadius: 0 },
-          { label: 'VWAP',  data: [], borderColor: '#006494', tension: 0.32, borderDash:[6,6], pointRadius: 0 },
-          { label: '20 EMA',data: [], borderColor: '#964219', tension: 0.32, borderDash:[4,4], pointRadius: 0 }
-        ]
-      },
-      options: {
-        responsive: true,
-        maintainAspectRatio: false,
-        plugins: { legend: { labels: { color: getComputedStyle(document.documentElement).getPropertyValue('--color-text') } } },
-        scales: {
-          x: { ticks: { color: getComputedStyle(document.documentElement).getPropertyValue('--color-text-muted') }, grid: { color: 'rgba(128,128,128,.12)' } },
-          y: { ticks: { color: getComputedStyle(document.documentElement).getPropertyValue('--color-text-muted') }, grid: { color: 'rgba(128,128,128,.12)' } }
+  // ── Charts ────────────────────────────────────────────────────────────────
+  let chartSym = 'SPY';
+  let sigChartSym = 'SPY';
+
+  function mkChart(canvasId) {
+    return new Chart(document.getElementById(canvasId), {
+      type:'line',
+      data:{labels:[],datasets:[
+        {label:'Price',data:[],borderColor:'#14b8a6',borderWidth:2.5,tension:.3,pointRadius:0,fill:false},
+        {label:'VWAP', data:[],borderColor:'#3b82f6',borderWidth:1.5,tension:.3,pointRadius:0,borderDash:[5,4],fill:false},
+        {label:'EMA20',data:[],borderColor:'#f59e0b',borderWidth:1.5,tension:.3,pointRadius:0,borderDash:[3,3],fill:false},
+      ]},
+      options:{
+        responsive:true,maintainAspectRatio:false,animation:false,
+        plugins:{legend:{labels:{color:'#888896',font:{size:11}}}},
+        scales:{
+          x:{ticks:{color:'#44444f',font:{size:10},maxTicksLimit:8},grid:{color:'#1e1e24'}},
+          y:{ticks:{color:'#44444f',font:{size:10}},grid:{color:'#1e1e24'}}
         }
       }
     });
+  }
 
-    // ── Load alerts ──────────────────────────────────────────────────────────
-    async function loadAlerts() {
-      const data = await dbFetch('alerts', '?select=*&order=created_at.desc&limit=10');
-      const feedEl = document.getElementById('alert-feed');
-      feedEl.innerHTML = '';
+  const mainChart = mkChart('priceChart');
+  const sigChart  = mkChart('sigChart');
 
-      if (!data || data.length === 0) {
-        feedEl.innerHTML = '<div class="sub">No alerts yet. Waiting for trading signals…</div>';
-        return;
-      }
-
-      data.forEach(a => {
-        const el = document.createElement('div');
-        const cls = a.priority === 'ready' ? 'ready' : a.priority === 'watch' ? 'watch' : '';
-        el.className = `alert ${cls}`;
-        const time = new Date(a.created_at).toLocaleTimeString();
-        el.innerHTML = `<strong>${a.headline}</strong><div class="sub" style="margin-top:.3rem;">${a.message}</div><div class="label" style="margin-top:.4rem; font-size:.75rem;">${time}</div>`;
-        feedEl.appendChild(el);
-      });
+  async function updateChart(sym, chart, emptyElId) {
+    const data = await db('alerts',`?select=context,created_at&ticker=eq.${sym}&order=created_at.asc&limit=30`);
+    const pts = (data||[]).filter(d=>d.context?.entry_price);
+    const emptyEl = document.getElementById(emptyElId);
+    if (pts.length===0) {
+      if (emptyEl) { document.getElementById(emptyElId.replace('empty','Chart') || 'priceChart').style.display='none'; emptyEl.style.display='block'; }
+      return;
     }
+    if (emptyEl) { emptyEl.style.display='none'; }
+    chart.data.labels = pts.map(d=>new Date(d.created_at).toLocaleTimeString([],{hour:'2-digit',minute:'2-digit',second:'2-digit'}));
+    chart.data.datasets[0].data = pts.map(d=>d.context.entry_price||null);
+    chart.data.datasets[1].data = pts.map(d=>d.context.vwap_at_entry||null);
+    chart.data.datasets[2].data = pts.map(d=>d.context.ema20_at_entry||null);
+    chart.update('none');
+  }
 
-    // ── Load signal snapshots / watch queue ──────────────────────────────────
-    async function loadSignals() {
-      const data = await dbFetch('signal_snapshots', '?select=*&order=created_at.desc&limit=40');
-      const watchEl = document.getElementById('watchlist');
+  document.getElementById('chart-sym-sel').addEventListener('change', e=>{
+    chartSym = e.target.value;
+    document.getElementById('chart-title').textContent = `${chartSym} — Price · VWAP · EMA20`;
+    updateChart(chartSym, mainChart, 'chart-empty');
+  });
 
-      if (!data || data.length === 0) {
-        watchEl.innerHTML = '<div class="sub">No signals yet. Worker initialising…</div>';
-        return;
-      }
+  document.getElementById('sig-chart-sym-sel').addEventListener('change', e=>{
+    sigChartSym = e.target.value;
+    document.getElementById('sig-chart-title').textContent = sigChartSym;
+    updateChart(sigChartSym, sigChart, null);
+    renderSigLevels();
+  });
 
-      // Keep latest per ticker
-      const byTicker = {};
-      data.forEach(s => { if (!byTicker[s.ticker]) byTicker[s.ticker] = s; });
+  // ── Signal levels panel ───────────────────────────────────────────────────
+  function renderSigLevels() {
+    const sym = sigChartSym;
+    const d = store[sym];
+    document.getElementById('sig-levels-title').textContent = `${sym} — latest`;
+    const el = document.getElementById('sig-levels');
+    if (!el) return;
+    if (!d?.price) { el.innerHTML='<div class="empty">No data yet.</div>'; return; }
+    const up = d.vwap && d.price > d.vwap;
+    el.innerHTML = `
+      <div class="s-row"><span class="s-lbl">Price</span><span class="${up?'ok':'warn'}">$${(+d.price).toFixed(2)}</span></div>
+      <div class="s-row"><span class="s-lbl">VWAP</span><span>${d.vwap?'$'+(+d.vwap).toFixed(2):'—'}</span></div>
+      <div class="s-row"><span class="s-lbl">EMA20</span><span>${d.ema20?'$'+(+d.ema20).toFixed(2):'—'}</span></div>
+      <div class="s-row"><span class="s-lbl">vs VWAP</span><span class="${up?'ok':'warn'}">${up?'▲ Above':'▼ Below'}</span></div>
+      <div class="s-row"><span class="s-lbl">Score</span><span>${d.score?(+d.score).toFixed(2):'—'}</span></div>
+      <div class="s-row"><span class="s-lbl">State</span><span class="${/ready/i.test(d.state)?'ok':/watch/i.test(d.state)?'warn':''}">${d.state||'—'}</span></div>
+      <div class="s-row"><span class="s-lbl">Last update</span><span>${ago(d.ts)}</span></div>
+    `;
+  }
 
-      watchEl.innerHTML = '';
-      Object.values(byTicker).slice(0, 6).forEach(s => {
-        const ready = s.setup_state && s.setup_state.toUpperCase() === 'READY';
-        const score = s.score != null ? Number(s.score).toFixed(2) : '—';
-        const el = document.createElement('div');
-        el.className = 'watch-item';
-        el.innerHTML = `
-          <span class="dot ${ready ? 'good' : ''}"></span>
-          <div>
-            <strong>${s.ticker}</strong>
-            <div class="label">${s.setup_family} · score ${score}</div>
-          </div>
-          <span class="pill ${ready ? 'good' : 'watch'}">${s.setup_state || '—'}</span>
-        `;
-        watchEl.appendChild(el);
-      });
-
-      return byTicker;
-    }
-
-    // ── Load levels from latest SPY alert context ────────────────────────────
-    async function loadLevels() {
-      const data = await dbFetch('alerts', `?select=context,created_at&ticker=eq.SPY&order=created_at.desc&limit=1`);
-      const levelsEl = document.getElementById('levels-rows');
-
-      if (!data || data.length === 0 || !data[0].context) {
-        levelsEl.innerHTML = '<div class="sub">No SPY data yet.</div>';
-        return null;
-      }
-
-      const ctx = data[0].context;
-      const p  = ctx.entry_price     != null ? `$${Number(ctx.entry_price).toFixed(2)}`     : '—';
-      const v  = ctx.vwap_at_entry   != null ? `$${Number(ctx.vwap_at_entry).toFixed(2)}`   : '—';
-      const e  = ctx.ema20_at_entry  != null ? `$${Number(ctx.ema20_at_entry).toFixed(2)}`  : '—';
-      const sc = ctx.setup_score     != null ? Number(ctx.setup_score).toFixed(2)           : '—';
-      const st = ctx.setup_state     || '—';
-
-      levelsEl.innerHTML = `
-        <div class="row"><span class="label">Last price</span><span class="value">${p}</span></div>
-        <div class="row"><span class="label">VWAP</span><span class="value">${v}</span></div>
-        <div class="row"><span class="label">20 EMA</span><span class="value">${e}</span></div>
-        <div class="row"><span class="label">Signal score</span><span class="value">${sc}</span></div>
-        <div class="row"><span class="label">Setup state</span><span class="value">${st}</span></div>
+  // ── Alert feed (shared renderer) ──────────────────────────────────────────
+  function renderAlerts(data, containerId) {
+    const el = document.getElementById(containerId);
+    if (!data||data.length===0) { el.innerHTML='<div class="empty">No alerts yet.</div>'; return; }
+    el.innerHTML='';
+    data.forEach(a=>{
+      const cls = /ready/i.test(a.priority)?'ready':/watch/i.test(a.priority)?'watch':'';
+      const ctx = a.context||{};
+      const chips = [
+        ctx.entry_price   ? `P: $${(+ctx.entry_price).toFixed(2)}`   : '',
+        ctx.vwap_at_entry ? `VWAP: $${(+ctx.vwap_at_entry).toFixed(2)}` : '',
+        ctx.ema20_at_entry? `EMA: $${(+ctx.ema20_at_entry).toFixed(2)}`  : '',
+        ctx.setup_score   ? `Score: ${(+ctx.setup_score).toFixed(2)}`    : '',
+      ].filter(Boolean);
+      const div = document.createElement('div');
+      div.className = `a-item ${cls}`;
+      div.innerHTML = `
+        <div class="a-top"><div class="a-head">${a.headline||a.ticker}</div><div class="a-time">${new Date(a.created_at).toLocaleTimeString()}</div></div>
+        <div class="a-msg">${a.message||''}</div>
+        ${chips.length?`<div class="a-chips">${chips.map(c=>`<span class="chip">${c}</span>`).join('')}</div>`:''}
       `;
-      return ctx;
-    }
+      el.appendChild(div);
+    });
+  }
 
-    // ── Update price chart from recent SPY alerts ────────────────────────────
-    async function updateChart() {
-      const data = await dbFetch('alerts', `?select=context,created_at&ticker=eq.SPY&order=created_at.asc&limit=20`);
+  async function loadAlerts() {
+    const data = await db('alerts','?select=*&order=created_at.desc&limit=15');
+    renderAlerts(data,'alert-feed-overview');
+  }
 
-      if (!data || data.length === 0) return;
+  async function loadAlertsPage() {
+    const sym = document.getElementById('alerts-sym-filter').value;
+    const filter = sym ? `&ticker=eq.${sym}` : '';
+    const data = await db('alerts',`?select=*&order=created_at.desc&limit=50${filter}`);
+    renderAlerts(data,'alerts-full');
+  }
 
-      const pts = data.filter(d => d.context && d.context.entry_price);
-      if (pts.length === 0) return;
+  document.getElementById('alerts-sym-filter').addEventListener('change', loadAlertsPage);
 
-      priceChart.data.labels = pts.map(d => new Date(d.created_at).toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'}));
-      priceChart.data.datasets[0].data = pts.map(d => d.context.entry_price);
-      priceChart.data.datasets[1].data = pts.map(d => d.context.vwap_at_entry || null);
-      priceChart.data.datasets[2].data = pts.map(d => d.context.ema20_at_entry || null);
-      priceChart.update('none');
+  // ── Signal snapshots table ─────────────────────────────────────────────────
+  async function loadSignalTable() {
+    const data = await db('signal_snapshots','?select=*&order=created_at.desc&limit=100');
+    const byTicker = {};
+    (data||[]).forEach(r=>{ if(!byTicker[r.ticker]) byTicker[r.ticker]=r; });
+    const tbody = document.getElementById('sig-tbody');
+    const rows = Object.values(byTicker);
+    if (!rows.length) { tbody.innerHTML='<tr><td colspan="5" class="empty">No signal snapshots yet.</td></tr>'; return; }
+    tbody.innerHTML = rows.map(r=>{
+      const ready=/ready/i.test(r.setup_state);
+      const watch=/watch/i.test(r.setup_state);
+      const cls = ready?'ok':watch?'warn':'';
+      return `<tr>
+        <td><strong>${r.ticker}</strong></td>
+        <td><span class="t-badge ${ready?'ready':watch?'watch':'none'}" style="display:inline-flex;">${r.setup_state||'—'}</span></td>
+        <td>${r.setup_family||'—'}</td>
+        <td>${r.score?(+r.score).toFixed(2):'—'}</td>
+        <td style="color:var(--faint);font-family:var(--mono);font-size:12px;">${ago(r.created_at)}</td>
+      </tr>`;
+    }).join('');
+  }
 
-      // Update chart pill
-      const last = pts[pts.length - 1].context;
-      if (last && last.entry_price && last.vwap_at_entry) {
-        const aboveVwap = last.entry_price > last.vwap_at_entry;
-        const pill = document.getElementById('chart-pill');
-        pill.className = `pill ${aboveVwap ? 'good' : 'watch'}`;
-        pill.textContent = aboveVwap ? 'Price above VWAP' : 'Price below VWAP';
+  // ── Stats + system state ──────────────────────────────────────────────────
+  async function loadStats() {
+    const today = new Date(); today.setHours(0,0,0,0);
+    const [aToday, readyS] = await Promise.all([
+      db('alerts',`?select=id&created_at=gte.${today.toISOString()}`),
+      db('signal_snapshots','?select=id&setup_state=eq.READY'),
+    ]);
+    document.getElementById('kpi-alerts').textContent = aToday?.length??0;
+    document.getElementById('kpi-alerts-sub').textContent = 'since midnight';
+    const r = readyS?.length??0;
+    document.getElementById('kpi-ready').textContent = r;
+    document.getElementById('kpi-ready-sub').textContent = r===1?'1 active':`${r} active`;
+  }
+
+  async function loadSystemState() {
+    const data = await db('system_state','?select=key,value,updated_at');
+    const m = {};
+    (data||[]).forEach(r=>{m[r.key]=r;});
+    const ws = m['worker_status'], ps = m['last_polling_time'];
+
+    if (ws) {
+      const s = ws.value?.status||'UNKNOWN';
+      const ok = s==='RUNNING';
+      const txt = ok?'✅ Running':`⚠️ ${s}`;
+      ['sys-worker','kpi-worker'].forEach(id=>{
+        const el = document.getElementById(id);
+        if(el){el.textContent=txt;el.className=ok?'ok':'warn';}
+      });
+      document.getElementById('kpi-worker-sub').textContent = ok?'Active':'Check backend';
+      const started = ws.value?.started_at;
+      if (started) {
+        const el = document.getElementById('sys-started');
+        if(el) el.textContent = new Date(started).toLocaleTimeString();
       }
-      document.getElementById('chart-title').textContent = 'SPY intraday context';
     }
 
-    // ── Load KPI counters ────────────────────────────────────────────────────
-    async function loadStats() {
-      // Alerts today
-      const today = new Date();
-      today.setHours(0,0,0,0);
-      const todayISO = today.toISOString();
+    if (ps?.value?.timestamp) {
+      const t = new Date(ps.value.timestamp);
+      const a = ago(ps.value.timestamp);
+      document.getElementById('kpi-poll').textContent = t.toLocaleTimeString();
+      const sp = document.getElementById('sys-poll');
+      if(sp) sp.textContent = `${t.toLocaleTimeString()} (${a})`;
+    }
+  }
 
-      const [alertsToday, readySnaps] = await Promise.all([
-        dbFetch('alerts', `?select=id&created_at=gte.${todayISO}`),
-        dbFetch('signal_snapshots', `?select=id&setup_state=eq.READY`),
+  // ── Helpers ───────────────────────────────────────────────────────────────
+  function ago(iso) {
+    if (!iso) return '—';
+    const s = Math.floor((Date.now()-new Date(iso))/1000);
+    if (s<5)   return 'just now';
+    if (s<60)  return `${s}s ago`;
+    if (s<3600)return `${Math.floor(s/60)}m ago`;
+    return `${Math.floor(s/3600)}h ago`;
+  }
+
+  // ── Main refresh cycle ────────────────────────────────────────────────────
+  async function refresh() {
+    try {
+      await Promise.all([
+        loadPrices(),
+        loadAlerts(),
+        loadAlertsPage(),
+        loadSignalTable(),
+        loadStats(),
+        loadSystemState(),
+        updateChart(chartSym, mainChart, 'chart-empty'),
+        updateChart(sigChartSym, sigChart, null),
       ]);
 
-      document.getElementById('kpi-alerts').textContent = alertsToday?.length ?? 0;
-      document.getElementById('kpi-alerts-sub').textContent = 'since market open';
-
-      const readyCount = readySnaps?.length ?? 0;
-      document.getElementById('kpi-ready').textContent = readyCount;
-      document.getElementById('kpi-ready-sub').textContent = readyCount === 1 ? '1 READY signal' : `${readyCount} READY signals`;
+      document.getElementById('conn-dot').className = 'conn-dot';
+      document.getElementById('conn-label').textContent = 'Supabase connected';
+      document.getElementById('sys-db')?.setAttribute('class','ok');
+      const sysDb = document.getElementById('sys-db');
+      if(sysDb) { sysDb.textContent='✅ Connected'; sysDb.className='ok'; }
+      document.getElementById('topbar-meta').textContent = 'Live · refreshes every 5s';
+    } catch(e) {
+      console.error('Refresh error:', e);
+      document.getElementById('conn-dot').className = 'conn-dot dead';
+      document.getElementById('conn-label').textContent = 'Connection error';
+      document.getElementById('topbar-meta').textContent = `Error: ${e.message?.slice(0,50)}`;
     }
+    document.getElementById('last-refresh').textContent = new Date().toLocaleTimeString();
+    document.getElementById('last-up').textContent = 'Updated '+new Date().toLocaleTimeString();
+  }
 
-    // ── Load system state ────────────────────────────────────────────────────
-    async function loadSystemState() {
-      const data = await dbFetch('system_state', '?select=key,value,updated_at');
-
-      const byKey = {};
-      data?.forEach(r => { byKey[r.key] = r; });
-
-      const workerRow = byKey['worker_status'];
-      const pollRow   = byKey['last_polling_time'];
-
-      if (workerRow) {
-        const status = workerRow.value?.status || 'UNKNOWN';
-        document.getElementById('sys-worker').textContent = status === 'RUNNING' ? '✅ Running' : `⚠️ ${status}`;
-        document.getElementById('kpi-state').textContent = status === 'RUNNING' ? 'Live' : 'Offline';
-        document.getElementById('kpi-state-sub').textContent = status === 'RUNNING' ? 'Worker active' : 'Worker stopped';
-      } else {
-        document.getElementById('sys-worker').textContent = '❓ Unknown';
-        document.getElementById('kpi-state').textContent = '?';
-        document.getElementById('kpi-state-sub').textContent = 'No state record';
-      }
-
-      if (pollRow) {
-        const ts = pollRow.value?.timestamp;
-        if (ts) {
-          const d = new Date(ts);
-          document.getElementById('sys-poll').textContent = d.toLocaleTimeString();
-        }
-      }
-    }
-
-    // ── Connection status indicator ──────────────────────────────────────────
-    function setConnected(ok) {
-      const dot   = document.getElementById('conn-dot');
-      const label = document.getElementById('conn-label');
-      const dbEl  = document.getElementById('sys-db');
-      dot.className   = `status-dot ${ok ? '' : 'offline'}`;
-      label.textContent = ok ? 'Supabase connected' : 'Connection error';
-      if (dbEl) dbEl.textContent = ok ? '✅ Connected' : '❌ Error';
-    }
-
-    function touchUpdateTime() {
-      document.getElementById('last-update').textContent =
-        'Updated ' + new Date().toLocaleTimeString();
-    }
-
-    // ── Main refresh cycle ───────────────────────────────────────────────────
-    async function refresh() {
-      try {
-        await Promise.all([
-          loadAlerts(),
-          loadSignals(),
-          loadLevels(),
-          updateChart(),
-          loadStats(),
-          loadSystemState(),
-        ]);
-        setConnected(true);
-        touchUpdateTime();
-      } catch (err) {
-        console.error('Refresh error:', err);
-        setConnected(false);
-      }
-    }
-
-    // Initial load then poll every 5 seconds
-    refresh();
-    setInterval(refresh, 5000);
-  </script>
+  refresh();
+  setInterval(refresh, 5000);
+</script>
 </body>
 </html>
