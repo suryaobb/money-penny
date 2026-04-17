@@ -108,8 +108,9 @@ class MassiveClient:
                 live_count += 1
                 
             except Exception as e:
-                pass  # Continue to next symbol
-        
+                print(f"  ⚠️  {symbol}: fetch error — {e}")
+                continue
+
         if live_count > 0:
             print(f"  ✓ Fetched {live_count}/{len(self.symbols)} live quotes from Massive REST API")
             return snapshot
@@ -118,12 +119,17 @@ class MassiveClient:
             return self.mock_snapshot()
 
     def mock_snapshot(self):
-        """Fallback mock data for testing"""
+        """Fallback mock data — all 10 symbols covered"""
+        ts = datetime.now().isoformat()
         return {
-            'QQQ': {'price': 640.47, 'vwap': 639.50, 'ema20': 638.00, 'volume': 125000000, 'bid': 640.40, 'ask': 640.55, 'timestamp': datetime.now().isoformat(), 'source': 'mock'},
-            'SPY': {'price': 588.20, 'vwap': 587.80, 'ema20': 587.00, 'volume': 185000000, 'bid': 588.15, 'ask': 588.25, 'timestamp': datetime.now().isoformat(), 'source': 'mock'},
-            'IWM': {'price': 198.50, 'vwap': 197.80, 'ema20': 197.00, 'volume': 95000000, 'bid': 198.45, 'ask': 198.55, 'timestamp': datetime.now().isoformat(), 'source': 'mock'},
-            'AAPL': {'price': 195.30, 'vwap': 194.80, 'ema20': 194.00, 'volume': 78000000, 'bid': 195.25, 'ask': 195.35, 'timestamp': datetime.now().isoformat(), 'source': 'mock'},
-            'NVDA': {'price': 125.50, 'vwap': 124.80, 'ema20': 124.00, 'volume': 142000000, 'bid': 125.45, 'ask': 125.55, 'timestamp': datetime.now().isoformat(), 'source': 'mock'},
-            'MSFT': {'price': 420.75, 'vwap': 420.00, 'ema20': 419.00, 'volume': 32000000, 'bid': 420.70, 'ask': 420.80, 'timestamp': datetime.now().isoformat(), 'source': 'mock'},
+            'SPY':   {'price': 588.20, 'vwap': 587.80, 'ema20': 587.00, 'volume': 185000000, 'bid': 588.15, 'ask': 588.25, 'timestamp': ts, 'source': 'mock'},
+            'QQQ':   {'price': 640.47, 'vwap': 639.50, 'ema20': 638.00, 'volume': 125000000, 'bid': 640.40, 'ask': 640.55, 'timestamp': ts, 'source': 'mock'},
+            'IWM':   {'price': 198.50, 'vwap': 197.80, 'ema20': 197.00, 'volume': 95000000,  'bid': 198.45, 'ask': 198.55, 'timestamp': ts, 'source': 'mock'},
+            'AAPL':  {'price': 195.30, 'vwap': 194.80, 'ema20': 194.00, 'volume': 78000000,  'bid': 195.25, 'ask': 195.35, 'timestamp': ts, 'source': 'mock'},
+            'AMZN':  {'price': 198.60, 'vwap': 197.90, 'ema20': 197.20, 'volume': 52000000,  'bid': 198.55, 'ask': 198.65, 'timestamp': ts, 'source': 'mock'},
+            'META':  {'price': 562.40, 'vwap': 561.00, 'ema20': 560.00, 'volume': 18000000,  'bid': 562.35, 'ask': 562.45, 'timestamp': ts, 'source': 'mock'},
+            'MSFT':  {'price': 420.75, 'vwap': 420.00, 'ema20': 419.00, 'volume': 32000000,  'bid': 420.70, 'ask': 420.80, 'timestamp': ts, 'source': 'mock'},
+            'NVDA':  {'price': 125.50, 'vwap': 124.80, 'ema20': 124.00, 'volume': 142000000, 'bid': 125.45, 'ask': 125.55, 'timestamp': ts, 'source': 'mock'},
+            'TSLA':  {'price': 248.30, 'vwap': 247.50, 'ema20': 246.80, 'volume': 95000000,  'bid': 248.25, 'ask': 248.35, 'timestamp': ts, 'source': 'mock'},
+            'GOOGL': {'price': 172.80, 'vwap': 172.10, 'ema20': 171.50, 'volume': 28000000,  'bid': 172.75, 'ask': 172.85, 'timestamp': ts, 'source': 'mock'},
         }
