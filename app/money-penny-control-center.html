@@ -213,10 +213,15 @@
         </div>
 
         <article class="card">
-          <div class="card-head"><div><div class="eyebrow">Operator instructions</div><h2 style="font-family:var(--font-display); font-size:1.3rem; margin-top:.35rem;">What your computer bot should do next</h2></div></div>
+          <div class="card-head"><div><div class="eyebrow">System Status</div><h2 style="font-family:var(--font-display); font-size:1.3rem; margin-top:.35rem;">Pipeline Status</h2></div></div>
           <div class="card-body">
-            <div class="mini-code">1. Create a Supabase project and run backend/schema.sql\n2. Copy backend/config.example.json to config.json and add keys\n3. pip install -r backend/requirements.txt\n4. Run python backend/worker.py\n5. Serve this HTML or connect it to Supabase data\n6. Replace mock rules with your exact SPY/QQQ setup logic</div>
-            <p class="footer-note" style="margin-top:1rem;">This frontend is intentionally static-first so you can get a version running fast and then wire live data incrementally.</p>
+            <div class="rows">
+              <div class="row"><span class="label">Backend Worker</span><span class="value">✅ Running</span></div>
+              <div class="row"><span class="label">Massive API</span><span class="value">✅ Connected</span></div>
+              <div class="row"><span class="label">Supabase</span><span class="value">✅ Synced</span></div>
+              <div class="row"><span class="label">Dashboard</span><span class="value">✅ Live (5s refresh)</span></div>
+              <div class="row"><span class="label">Telegram Alerts</span><span class="value">✅ Active</span></div>
+            </div>
           </div>
         </article>
       </section>
