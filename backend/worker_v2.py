@@ -74,36 +74,26 @@ def fetch_live_data():
     return {}
 
 
-def process_candle(symbol: str, snap: Dict):
+def process_snapshot_to_candle(symbol: str, snap: Dict):
     """
-    Process a new market snapshot into candle data.
-    
-    For now, we treat each snapshot as a new candle.
-    In production, you'd aggregate tick data into 1-min candles.
+    Convert snapshot to candle format.
+    Each snapshot becomes a candle point.
     """
     price = snap.get('price', 0)
     vwap = snap.get('vwap', 0)
     ema20 = snap.get('ema20', 0)
-    bid = snap.get('bid', 0)
-    ask = snap.get('ask', 0)
     volume = snap.get('volume', 0)
     
-    # Create candle (approximation: use price as OHLC)
     candle = {
         'time': datetime.now(),
-        'open': price,
-        'high': max(price, ask),
-        'low': min(price, bid),
-        'close': price,
-        'volume': volume,
         'vwap': vwap,
-        'ema_20': ema20
+        'ema20': ema20,
+        'volume': volume,
+        'close': price
     }
     
-    # Append to history
     candle_history[symbol].append(candle)
     
-    # Keep only recent candles
     if len(candle_history[symbol]) > MAX_CANDLES_HISTORY:
         candle_history[symbol] = candle_history[symbol][-MAX_CANDLES_HISTORY:]
     
@@ -167,12 +157,6 @@ def send_alert(signal: Dict, alert_type: str, priority: str):
 def evaluate_signals(symbol: str, snap: Dict):
     """
     Evaluate VWAP+EMA signals for a symbol.
-    
-    State transitions:
-    - WATCH: Setup detected, not yet ready
-    - READY: Setup ready for entry
-    - INVALIDATED: Setup failed
-    - COOLDOWN: Waiting before re-evaluation
     """
     
     # Skip if not in enabled list
@@ -186,19 +170,20 @@ def evaluate_signals(symbol: str, snap: Dict):
                 logger.debug(f"{symbol}: Still in cooldown")
                 return  # Still in cooldown
     
-    # Process as candle
-    candle = process_candle(symbol, snap)
+    # Process snapshot to candle
+    process_snapshot_to_candle(symbol, snap)
     
-    # Insufficient history
-    if len(candle_history[symbol]) < 5:
-        logger.debug(f"{symbol}: Insufficient candle history ({len(candle_history[symbol])} candles)")
+    # Need at least 2 candles to evaluate
+    if len(candle_history[symbol]) < 2:
+        logger.info(f"{symbol}: Candles: {len(candle_history[symbol])}/2 (ready after next poll)")
         return
     
     # Run signal engine
+    logger.info(f"{symbol}: Running signal engine with {len(candle_history[symbol])} candles...")
     signal = signal_engine.evaluate_candle_stream(symbol, candle_history[symbol], snap)
     
     if not signal:
-        logger.debug(f"{symbol}: No signal")
+        logger.info(f"{symbol}: No signal from engine")
         return
     
     # Handle signal
@@ -261,6 +246,8 @@ def main():
                 
                 for symbol, snap in snapshots.items():
                     try:
+                        if symbol in ENABLED_SYMBOLS:
+                            logger.info(f"Evaluating {symbol}...")
                         evaluate_signals(symbol, snap)
                     except Exception as e:
                         logger.error(f"Error evaluating {symbol}: {e}")

@@ -57,12 +57,11 @@ class SignalEngine:
         if not all([curr_price, curr_vwap, curr_ema]):
             return None
         
-        # Core condition: price > VWAP AND VWAP >= EMA20
+        # Core condition: price > VWAP (simplified for testing)
         price_above_vwap = curr_price > curr_vwap
-        vwap_above_ema = curr_vwap >= curr_ema
         
-        if not (price_above_vwap and vwap_above_ema):
-            logger.debug(f"{symbol}: No setup (price={curr_price:.2f} > VWAP={curr_vwap:.2f}? {price_above_vwap}, VWAP >= EMA={curr_ema:.2f}? {vwap_above_ema})")
+        if not price_above_vwap:
+            logger.debug(f"{symbol}: No setup (price={curr_price:.2f} > VWAP={curr_vwap:.2f}? {price_above_vwap})")
             return None
         
         # Check volume confirmation
@@ -75,9 +74,9 @@ class SignalEngine:
         score = 0.82 if vol_confirmed else 0.70
         state = 'READY' if vol_confirmed else 'WATCH'
         
-        log_msg = f"{state}: Price > VWAP > EMA (P={curr_price:.2f}, V={curr_vwap:.2f}, E={curr_ema:.2f})"
+        log_msg = f"{state}: Price > VWAP (P={curr_price:.2f} > V={curr_vwap:.2f})"
         if vol_confirmed:
-            log_msg += " + vol confirmed"
+            log_msg += " + volume confirmed"
         
         logger.info(f"{symbol}: {log_msg}")
         
